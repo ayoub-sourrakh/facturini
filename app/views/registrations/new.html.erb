@@ -1,0 +1,83 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-gray-900">Facturini</h1>
+      <p class="mt-2 text-gray-600">Créez votre compte</p>
+    </div>
+
+    <% if flash[:alert] %>
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <%= form_with url: registration_path, method: :post, class: "mt-8 space-y-6" do |f| %>
+      <fieldset class="space-y-4">
+        <legend class="text-lg font-medium text-gray-900">Votre entreprise</legend>
+
+        <div>
+          <%= f.label "organization[name]", "Raison sociale", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.text_field "organization[name]", required: true,
+              value: @organization.name,
+              class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
+        </div>
+
+        <div>
+          <%= f.label "organization[email]", "Email de l'entreprise", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.email_field "organization[email]", required: true,
+              value: @organization.email,
+              class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
+        </div>
+      </fieldset>
+
+      <fieldset class="space-y-4">
+        <legend class="text-lg font-medium text-gray-900">Votre compte</legend>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <%= f.label "user[first_name]", "Prénom", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.text_field "user[first_name]", required: true,
+                value: @user.first_name,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
+          </div>
+
+          <div>
+            <%= f.label "user[last_name]", "Nom", class: "block text-sm font-medium text-gray-700" %>
+            <%= f.text_field "user[last_name]", required: true,
+                value: @user.last_name,
+                class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
+          </div>
+        </div>
+
+        <div>
+          <%= f.label "user[email]", "Email personnel", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.email_field "user[email]", required: true,
+              value: @user.email,
+              class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
+        </div>
+
+        <div>
+          <%= f.label "user[password]", "Mot de passe", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.password_field "user[password]", required: true,
+              class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
+        </div>
+
+        <div>
+          <%= f.label "user[password_confirmation]", "Confirmer le mot de passe", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.password_field "user[password_confirmation]", required: true,
+              class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
+        </div>
+      </fieldset>
+
+      <div>
+        <%= f.submit "Créer mon compte",
+            class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
+      </div>
+
+      <p class="text-center text-sm text-gray-600">
+        Déjà un compte ?
+        <%= link_to "Se connecter", new_session_path, class: "text-indigo-600 hover:text-indigo-500" %>
+      </p>
+    <% end %>
+  </div>
+</div>

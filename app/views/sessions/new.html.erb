@@ -1,0 +1,43 @@
+<div class="max-h-screen flex items-center justify-center bg-gray-50">
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-gray-900">Facturini</h1>
+      <p class="mt-2 text-gray-600">Connectez-vous à votre compte</p>
+    </div>
+
+    <% if flash[:alert] %>
+      <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <% if flash[:notice] %>
+      <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+        <%= flash[:notice] %>
+      </div>
+    <% end %>
+
+    <%= form_with url: session_path, method: :post, class: "mt-8 space-y-6" do |f| %>
+      <div>
+        <%= f.label :email, "Email", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.email_field :email, required: true, autofocus: true,
+            class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
+      </div>
+
+      <div>
+        <%= f.label :password, "Mot de passe", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.password_field :password, required: true,
+            class: "mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" %>
+      </div>
+
+      <div>
+        <%= f.submit "Se connecter",
+            class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
+      </div>
+    <% end %>
+    <p class="text-center text-sm text-gray-600">
+    Pas encore de compte ?
+    <%= link_to "Créer un compte", new_registration_path, class: "text-indigo-600 hover:text-indigo-500" %>
+  </p>
+  </div>
+</div>

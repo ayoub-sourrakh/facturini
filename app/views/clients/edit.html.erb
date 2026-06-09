@@ -1,0 +1,62 @@
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">Modifier <%= @client.name %></h1>
+
+  <%= form_with model: @client, class: "space-y-4" do |f| %>
+    <% if @client.errors.any? %>
+      <div class="bg-red-50 text-red-700 p-4 rounded">
+        <h2><%= pluralize(@client.errors.count, "erreur") %> :</h2>
+        <ul class="list-disc ml-5">
+          <% @client.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :name, "Nom / Raison sociale", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :name, required: true, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :client_type, "Type", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.select :client_type, [["Particulier", "individual"], ["Professionnel", "professional"]], {}, { class: "mt-1 block w-full border rounded px-3 py-2" } %>
+    </div>
+
+    <div>
+      <%= f.label :email, "Email", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.email_field :email, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :phone, "Téléphone", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.telephone_field :phone, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :address, "Adresse", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_area :address, rows: 3, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <%= f.label :city, "Ville", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :city, class: "mt-1 block w-full border rounded px-3 py-2" %>
+      </div>
+      <div>
+        <%= f.label :zip_code, "Code postal", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :zip_code, class: "mt-1 block w-full border rounded px-3 py-2" %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.label :country, "Pays", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :country, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div class="flex space-x-4">
+      <%= f.submit "Mettre à jour", class: "bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700" %>
+      <%= link_to "Annuler", client_path(@client), class: "text-gray-600 hover:text-gray-900 px-4 py-2" %>
+    </div>
+  <% end %>
+</div>

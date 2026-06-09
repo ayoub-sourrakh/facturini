@@ -1,0 +1,46 @@
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">Nouvelle facture</h1>
+
+  <%= form_with model: @invoice, class: "space-y-4" do |f| %>
+    <% if @invoice.errors.any? %>
+      <div class="bg-red-50 text-red-700 p-4 rounded">
+        <h2><%= pluralize(@invoice.errors.count, "erreur") %> :</h2>
+        <ul class="list-disc ml-5">
+          <% @invoice.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :number, "Numéro de facture", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :number, required: true, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :client_id, "Client", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.collection_select :client_id, @clients, :id, :name, { include_blank: "Sélectionner..." }, { required: true, class: "mt-1 block w-full border rounded px-3 py-2" } %>
+    </div>
+
+    <div>
+      <%= f.label :issue_date, "Date d'émission", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.date_field :issue_date, value: Date.today, required: true, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :due_date, "Date d'échéance", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.date_field :due_date, value: 30.days.from_now.to_date, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :subject, "Objet", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :subject, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div class="flex space-x-4">
+      <%= f.submit "Créer la facture", class: "bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700" %>
+      <%= link_to "Annuler", invoices_path, class: "text-gray-600 hover:text-gray-900 px-4 py-2" %>
+    </div>
+  <% end %>
+</div>
