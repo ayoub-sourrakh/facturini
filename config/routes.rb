@@ -11,13 +11,10 @@ Rails.application.routes.draw do
   # Dashboard (protégé)
   get "dashboard", to: "dashboard#index", as: :dashboard
 
-  # Invoices (CRUD complet)
-  resources :invoices
-
   # Clients (CRUD complet)
   resources :clients
 
-  # Invoice items (CRUD complet)
+  # Invoices & Invoice items (CRUD complet)
   resources :invoices do
     resources :invoice_items, only: [:create, :destroy]
     member do

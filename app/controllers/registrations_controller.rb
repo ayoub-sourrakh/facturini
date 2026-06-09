@@ -1,6 +1,8 @@
 class RegistrationsController < ApplicationController
   skip_before_action :require_authentication
 
+  layout "auth"
+
   def new
     @organization = Organization.new
     @user = User.new

@@ -1,43 +1,58 @@
-<div class="max-w-2xl mx-auto px-4 py-8">
+<div class="max-w-2xl mx-auto">
   <div class="flex justify-between items-start mb-6">
     <div>
-      <h1 class="text-2xl font-bold"><%= @client.name %></h1>
-      <p class="text-gray-600"><%= @client.client_type == "professional" ? "Professionnel" : "Particulier" %></p>
+      <h1 class="text-2xl font-bold text-gray-900"><%= @client.name %></h1>
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 <%= @client.client_type == 'professional' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700' %>">
+        <%= @client.client_type == "professional" ? "Professionnel" : "Particulier" %>
+      </span>
     </div>
-    <div class="space-x-2">
-      <%= link_to "Modifier", edit_client_path(@client), class: "text-indigo-600 hover:text-indigo-900" %>
-      <%= link_to "Retour", clients_path, class: "text-gray-600 hover:text-gray-900" %>
+    <div class="flex items-center space-x-2">
+      <%= link_to edit_client_path(@client),
+          class: "inline-flex items-center space-x-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition" do %>
+        <%= icon("pencil-square", css_class: "size-4") %>
+        <span>Modifier</span>
+      <% end %>
+      <%= button_to client_path(@client), method: :delete,
+          class: "inline-flex items-center space-x-1.5 bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition",
+          form: { data: { turbo_confirm: "Supprimer ce client ?" } } do %>
+        <%= icon("trash", css_class: "size-4") %>
+        <span>Supprimer</span>
+      <% end %>
+      <%= link_to clients_path, class: "inline-flex items-center space-x-1.5 text-sm text-gray-500 hover:text-gray-700 transition" do %>
+        <%= icon("arrow-left", css_class: "size-4") %>
+        <span>Retour</span>
+      <% end %>
     </div>
   </div>
 
-  <div class="bg-white shadow rounded-lg p-6 space-y-4">
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6 space-y-4">
     <% if @client.email.present? %>
       <div>
-        <p class="text-sm text-gray-500">Email</p>
-        <p><%= @client.email %></p>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</p>
+        <p class="mt-1 text-sm text-gray-900"><%= @client.email %></p>
       </div>
     <% end %>
 
     <% if @client.phone.present? %>
       <div>
-        <p class="text-sm text-gray-500">Téléphone</p>
-        <p><%= @client.phone %></p>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Téléphone</p>
+        <p class="mt-1 text-sm text-gray-900"><%= @client.phone %></p>
       </div>
     <% end %>
 
     <% if @client.address.present? %>
       <div>
-        <p class="text-sm text-gray-500">Adresse</p>
-        <p><%= @client.address %></p>
-        <p><%= @client.zip_code %> <%= @client.city %></p>
-        <p><%= @client.country %></p>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Adresse</p>
+        <p class="mt-1 text-sm text-gray-900"><%= @client.address %></p>
+        <p class="text-sm text-gray-900"><%= @client.zip_code %> <%= @client.city %></p>
+        <p class="text-sm text-gray-900"><%= @client.country %></p>
       </div>
     <% end %>
 
     <% if @client.siret.present? %>
       <div>
-        <p class="text-sm text-gray-500">SIRET</p>
-        <p><%= @client.siret %></p>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">SIRET</p>
+        <p class="mt-1 text-sm text-gray-900"><%= @client.siret %></p>
       </div>
     <% end %>
   </div>

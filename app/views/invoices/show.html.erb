@@ -1,114 +1,142 @@
-<div class="max-w-4xl mx-auto px-4 py-8">
+<div class="max-w-4xl mx-auto">
   <div class="flex justify-between items-start mb-6">
     <div>
-      <h1 class="text-2xl font-bold">Facture <%= @invoice.number %></h1>
-      <p class="text-gray-600"><%= @invoice.client.name %></p>
-      <p class="text-sm text-gray-500 mt-1">
-        Statut : <%= @invoice.status %>
+      <h1 class="text-2xl font-bold text-gray-900">Facture <%= @invoice.number %></h1>
+      <p class="text-sm text-gray-500 mt-1"><%= @invoice.client.name %></p>
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2 <%= @invoice.draft? ? 'bg-gray-100 text-gray-700' : 'bg-green-100 text-green-700' %>">
+        <%= @invoice.draft? ? "Brouillon" : "Envoyée" %>
         <% if @invoice.sent_at %>
-          (envoyée le <%= l @invoice.sent_at, format: :short %>)
+          — <%= l @invoice.sent_at, format: :short %>
         <% end %>
-      </p>
+      </span>
     </div>
-    <div class="space-x-2">
-      <% if @invoice.draft? %>
-        <%= link_to "Modifier", edit_invoice_path(@invoice), class: "text-indigo-600 hover:text-indigo-900" %>
-      <% end %>
-      <% if @invoice.draft? %>
-        <%= button_to "Supprimer", invoice_path(@invoice), method: :delete,
-            class: "text-red-600 hover:text-red-800", form: { data: { turbo_confirm: "Supprimer cette facture ?" } } %>
-      <% end %>
+    <div class="flex items-center space-x-2">
       <% if @invoice.draft? && @invoice.invoice_items.any? %>
-        <%= button_to "📤 Marquer comme envoyée", send_invoice_invoice_path(@invoice), method: :patch,
-            class: "bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm",
-            data: { turbo_confirm: "Confirmer l'envoi ? La facture ne pourra plus être modifiée." } %>
+        <%= button_to send_invoice_invoice_path(@invoice), method: :patch,
+            class: "inline-flex items-center space-x-1.5 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition",
+            data: { turbo_confirm: "Confirmer l'envoi ? La facture ne pourra plus être modifiée." } do %>
+          <%= icon("paper-airplane", css_class: "size-4") %>
+          <span>Envoyer</span>
+        <% end %>
       <% end %>
-      <%= link_to "⬇️ Télécharger PDF", download_pdf_invoice_path(@invoice), class: "bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700 text-sm" %>
-      <%= link_to "Retour", invoices_path, class: "text-gray-600 hover:text-gray-900" %>
+      <%= link_to download_pdf_invoice_path(@invoice),
+          class: "inline-flex items-center space-x-1.5 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition" do %>
+        <%= icon("arrow-down-tray", css_class: "size-4") %>
+        <span>PDF</span>
+      <% end %>
+      <% if @invoice.draft? %>
+        <%= link_to edit_invoice_path(@invoice),
+            class: "inline-flex items-center space-x-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition" do %>
+          <%= icon("pencil-square", css_class: "size-4") %>
+          <span>Modifier</span>
+        <% end %>
+        <%= button_to invoice_path(@invoice), method: :delete,
+            class: "inline-flex items-center space-x-1.5 bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition",
+            form: { data: { turbo_confirm: "Supprimer cette facture ?" } } do %>
+          <%= icon("trash", css_class: "size-4") %>
+          <span>Supprimer</span>
+        <% end %>
+      <% end %>
+      <%= link_to invoices_path, class: "inline-flex items-center space-x-1.5 text-sm text-gray-500 hover:text-gray-700 transition" do %>
+        <%= icon("arrow-left", css_class: "size-4") %>
+        <span>Retour</span>
+      <% end %>
     </div>
   </div>
 
-  <div class="bg-white shadow rounded-lg p-6 mb-6">
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6 mb-6">
     <div class="grid grid-cols-2 gap-4 mb-6">
       <div>
-        <p class="text-sm text-gray-500">Date d'émission</p>
-        <p><%= l @invoice.issue_date %></p>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'émission</p>
+        <p class="mt-1 text-sm text-gray-900"><%= l @invoice.issue_date %></p>
       </div>
       <div>
-        <p class="text-sm text-gray-500">Date d'échéance</p>
-        <p><%= l @invoice.due_date if @invoice.due_date %></p>
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'échéance</p>
+        <p class="mt-1 text-sm text-gray-900"><%= l @invoice.due_date if @invoice.due_date %></p>
       </div>
     </div>
 
     <% if @invoice.subject.present? %>
-      <p class="mb-4"><strong>Objet :</strong> <%= @invoice.subject %></p>
+      <div class="mb-6">
+        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Objet</p>
+        <p class="mt-1 text-sm text-gray-900"><%= @invoice.subject %></p>
+      </div>
     <% end %>
 
-    <h2 class="text-lg font-semibold mb-4">Lignes de facture</h2>
-    
-    <% if @invoice.invoice_items.any? %>
-      <table class="min-w-full mb-4 border-b">
-        <thead>
-          <tr class="border-b">
-            <th class="text-left py-2">Description</th>
-            <th class="text-right py-2">Qté</th>
-            <th class="text-right py-2">Prix unit.</th>
-            <th class="text-right py-2">TVA %</th>
-            <th class="text-right py-2"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @invoice.invoice_items.each do |item| %>
-            <tr class="border-b">
-              <td class="py-2"><%= item.description %></td>
-              <td class="text-right py-2"><%= item.quantity %></td>
-              <td class="text-right py-2"><%= number_to_currency(item.unit_price_cents / 100.0, unit: "€") %></td>
-              <td class="text-right py-2"><%= item.vat_rate %>%</td>
-              <td class="text-right py-2">
-                <% if @invoice.draft? %>
-                  <%= button_to "×", invoice_invoice_item_path(@invoice, item), method: :delete,
-                      class: "text-red-600 hover:text-red-800 font-bold", form: { data: { turbo_confirm: "Supprimer cette ligne ?" } } %>
-                <% end %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+    <h2 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Lignes de facture</h2>
 
-      <div class="text-right space-y-1 border-t pt-4">
-        <p class="text-gray-600">Total HT : <%= number_to_currency(@invoice.subtotal_cents / 100.0, unit: "€") %></p>
-        <p class="text-gray-600">TVA : <%= number_to_currency(@invoice.vat_amount_cents / 100.0, unit: "€") %></p>
-        <p class="text-xl font-bold text-gray-900">Total TTC : <%= number_to_currency(@invoice.total_cents / 100.0, unit: "€") %></p>
+    <% if @invoice.invoice_items.any? %>
+      <div class="border border-gray-200 rounded-lg overflow-hidden mb-4">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Qté</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Prix unit.</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">TVA %</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <% @invoice.invoice_items.each do |item| %>
+              <tr class="hover:bg-gray-50 transition">
+                <td class="px-4 py-3 text-sm text-gray-900"><%= item.description %></td>
+                <td class="px-4 py-3 text-sm text-gray-700 text-right"><%= item.quantity %></td>
+                <td class="px-4 py-3 text-sm text-gray-700 text-right"><%= number_to_currency(item.unit_price_cents / 100.0, unit: "€") %></td>
+                <td class="px-4 py-3 text-sm text-gray-700 text-right"><%= item.vat_rate %>%</td>
+                <td class="px-4 py-3 text-right">
+                  <% if @invoice.draft? %>
+                    <%= button_to invoice_invoice_item_path(@invoice, item), method: :delete,
+                        class: "text-gray-400 hover:text-red-600 transition", form: { data: { turbo_confirm: "Supprimer cette ligne ?" } } do %>
+                      <%= icon("x-mark", css_class: "size-4") %>
+                    <% end %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="text-right space-y-1 pt-2">
+        <p class="text-sm text-gray-500">Total HT : <%= number_to_currency(@invoice.subtotal_cents / 100.0, unit: "€") %></p>
+        <p class="text-sm text-gray-500">TVA : <%= number_to_currency(@invoice.vat_amount_cents / 100.0, unit: "€") %></p>
+        <p class="text-lg font-bold text-gray-900">Total TTC : <%= number_to_currency(@invoice.total_cents / 100.0, unit: "€") %></p>
       </div>
     <% else %>
-      <p class="text-gray-500 mb-4">Aucune ligne. Ajoutez votre première ligne ci-dessous.</p>
+      <p class="text-gray-500 text-sm mb-4">Aucune ligne. Ajoutez votre première ligne ci-dessous.</p>
     <% end %>
 
     <% if @invoice.draft? %>
-      <div class="mt-6 pt-6 border-t">
-        <h3 class="text-md font-semibold mb-3">Ajouter une ligne</h3>
+      <div class="mt-6 pt-6 border-t border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3">Ajouter une ligne</h3>
         <%= form_with model: [@invoice, InvoiceItem.new], class: "grid grid-cols-12 gap-3 items-end" do |f| %>
           <div class="col-span-4">
-            <%= f.label :description, "Description", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.text_field :description, required: true, class: "mt-1 block w-full border rounded px-2 py-1" %>
+            <%= f.label :description, "Description", class: "block text-xs font-medium text-gray-700 mb-1" %>
+            <%= f.text_field :description, required: true, placeholder: "Prestation...",
+                class: "block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
           </div>
           <div class="col-span-2">
-            <%= f.label :quantity, "Qté", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.number_field :quantity, step: 0.01, value: 1, required: true, class: "mt-1 block w-full border rounded px-2 py-1" %>
+            <%= f.label :quantity, "Qté", class: "block text-xs font-medium text-gray-700 mb-1" %>
+            <%= f.number_field :quantity, step: 0.01, value: 1, required: true,
+                class: "block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
           </div>
           <div class="col-span-3">
-            <%= f.label :unit_price_cents, "Prix unit. (centimes)", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.number_field :unit_price_cents, value: 10000, required: true, class: "mt-1 block w-full border rounded px-2 py-1" %>
+            <%= f.label :unit_price_cents, "Prix unit. (centimes)", class: "block text-xs font-medium text-gray-700 mb-1" %>
+            <%= f.number_field :unit_price_cents, value: 10000, required: true,
+                class: "block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
           </div>
           <div class="col-span-2">
-            <%= f.label :vat_rate, "TVA %", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.number_field :vat_rate, step: 0.01, value: 20, required: true, class: "mt-1 block w-full border rounded px-2 py-1" %>
+            <%= f.label :vat_rate, "TVA %", class: "block text-xs font-medium text-gray-700 mb-1" %>
+            <%= f.number_field :vat_rate, step: 0.01, value: 20, required: true,
+                class: "block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
           </div>
           <div class="col-span-1">
-            <%= f.submit "+", class: "w-full bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 font-bold" %>
+            <%= f.submit "+",
+                class: "w-full bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 font-bold text-sm transition cursor-pointer" %>
           </div>
         <% end %>
-        <p class="text-xs text-gray-500 mt-2">Prix en centimes : 10000 = 100€, 5000 = 50€, etc.</p>
+        <p class="text-xs text-gray-400 mt-2">Prix en centimes : 10000 = 100€, 5000 = 50€, etc.</p>
       </div>
     <% end %>
   </div>
