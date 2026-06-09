@@ -16,7 +16,7 @@ Rails.application.routes.draw do
 
   # Invoices & Invoice items (CRUD complet)
   resources :invoices do
-    resources :invoice_items, only: [:create, :destroy]
+    resources :invoice_items, only: [ :create, :destroy ]
     member do
       patch :send_invoice
       get :download_pdf

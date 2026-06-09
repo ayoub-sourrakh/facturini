@@ -1,5 +1,5 @@
 class InvoicesController < ApplicationController
-  before_action :set_invoice, only: [:show, :edit, :update, :destroy, :send_invoice, :download_pdf]
+  before_action :set_invoice, only: [ :show, :edit, :update, :destroy, :send_invoice, :download_pdf ]
 
   def index
     @invoices = current_user.organization.invoices.order(created_at: :desc)

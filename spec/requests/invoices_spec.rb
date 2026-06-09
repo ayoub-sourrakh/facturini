@@ -114,11 +114,11 @@ RSpec.describe "Invoices", type: :request do
 
       it "marque la facture comme envoyée" do
         patch send_invoice_invoice_path(draft_invoice)
-        
+
         draft_invoice.reload
         expect(draft_invoice.status).to eq("sent")
         expect(draft_invoice.sent_at).to be_present
-        
+
         expect(response).to redirect_to(invoice_path(draft_invoice))
       end
     end
@@ -128,7 +128,7 @@ RSpec.describe "Invoices", type: :request do
 
       it "ne change pas le statut" do
         patch send_invoice_invoice_path(sent_invoice)
-        
+
         expect(sent_invoice.reload.status).to eq("sent")
         expect(response).to redirect_to(invoice_path(sent_invoice))
       end
@@ -139,7 +139,7 @@ RSpec.describe "Invoices", type: :request do
 
       it "refuse d'envoyer une facture vide" do
         patch send_invoice_invoice_path(empty_invoice)
-        
+
         expect(empty_invoice.reload.status).to eq("draft")
         expect(response).to redirect_to(invoice_path(empty_invoice))
       end
@@ -148,12 +148,12 @@ RSpec.describe "Invoices", type: :request do
 
   describe "GET /invoices/:id/download_pdf" do
     let!(:item) { create(:invoice_item, invoice: invoice) }
-    
+
     before { InvoiceCalculator.call(invoice) }
 
     it "télécharge le PDF" do
       get download_pdf_invoice_path(invoice)
-      
+
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to eq("application/pdf")
       expect(response.headers["Content-Disposition"]).to include("facture_#{invoice.number}.pdf")

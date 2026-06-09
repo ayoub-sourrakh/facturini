@@ -1,6 +1,6 @@
 class InvoicePdfGenerator
   require "prawn/table"
-  
+
   def self.call(invoice)
     new(invoice).call
   end
@@ -34,8 +34,8 @@ class InvoicePdfGenerator
 
       # Tableau des lignes
       if @invoice.invoice_items.any?
-        data = [["Description", "Qté", "Prix unit.", "TVA %", "Total"]]
-        
+        data = [ [ "Description", "Qté", "Prix unit.", "TVA %", "Total" ] ]
+
         @invoice.invoice_items.each do |item|
           line_total = (item.quantity * item.unit_price_cents).round
           data << [

@@ -1,5 +1,5 @@
 class ClientsController < ApplicationController
-  before_action :set_client, only: [:show, :edit, :update, :destroy]
+  before_action :set_client, only: [ :show, :edit, :update, :destroy ]
 
   def index
     @clients = current_user.organization.clients.order(name: :asc)
@@ -45,7 +45,7 @@ class ClientsController < ApplicationController
   end
 
   def client_params
-    params.require(:client).permit(:name, :email, :phone, :address, :city, :zip_code, 
+    params.require(:client).permit(:name, :email, :phone, :address, :city, :zip_code,
                                    :country, :siret, :vat_number, :client_type)
   end
 end
