@@ -36,19 +36,19 @@ RSpec.describe "Invoices", type: :request do
 
   describe "POST /invoices" do
     context "avec des paramètres valides" do
-      it "crée une facture" do
+      it "crée une facture en brouillon" do
         expect {
           post invoices_path, params: {
             invoice: {
               number: "INV-002",
               client_id: client.id,
               issue_date: Date.today,
-              due_date: Date.today + 30.days,
               subject: "Test facture"
             }
           }
         }.to change(Invoice, :count).by(1)
 
+        expect(Invoice.last.status).to eq("draft")
         expect(response).to redirect_to(invoice_path(Invoice.last))
       end
     end
@@ -65,19 +65,29 @@ RSpec.describe "Invoices", type: :request do
   end
 
   describe "GET /invoices/:id/edit" do
-    it "affiche le formulaire d'édition" do
+    it "affiche le formulaire d'édition pour un brouillon" do
       get edit_invoice_path(invoice)
       expect(response).to have_http_status(:ok)
     end
   end
 
   describe "PATCH /invoices/:id" do
-    it "met à jour la facture" do
-      patch invoice_path(invoice), params: {
-        invoice: { subject: "Nouvel objet" }
-      }
-      expect(response).to redirect_to(invoice_path(invoice))
-      expect(invoice.reload.subject).to eq("Nouvel objet")
+    context "facture en brouillon" do
+      it "met à jour la facture" do
+        patch invoice_path(invoice), params: { invoice: { subject: "Nouvel objet" } }
+        expect(response).to redirect_to(invoice_path(invoice))
+        expect(invoice.reload.subject).to eq("Nouvel objet")
+      end
+    end
+
+    context "facture finalisée" do
+      let!(:finalized_invoice) { create(:invoice, organization: organization, client: client, status: :finalized) }
+
+      it "ne peut pas modifier une facture finalisée" do
+        patch invoice_path(finalized_invoice), params: { invoice: { subject: "Tentative" } }
+        expect(response).to redirect_to(invoice_path(finalized_invoice))
+        expect(finalized_invoice.reload.subject).not_to eq("Tentative")
+      end
     end
   end
 
@@ -89,36 +99,88 @@ RSpec.describe "Invoices", type: :request do
         expect {
           delete invoice_path(draft_invoice)
         }.to change(Invoice, :count).by(-1)
-
         expect(response).to redirect_to(invoices_path)
       end
     end
 
     context "facture finalisée" do
+      let!(:finalized_invoice) { create(:invoice, organization: organization, client: client, status: :finalized) }
+
+      it "ne supprime pas la facture" do
+        expect {
+          delete invoice_path(finalized_invoice)
+        }.not_to change(Invoice, :count)
+        expect(response).to redirect_to(invoice_path(finalized_invoice))
+      end
+    end
+
+    context "facture envoyée" do
       let!(:sent_invoice) { create(:invoice, organization: organization, client: client, status: :sent) }
 
       it "ne supprime pas la facture" do
         expect {
           delete invoice_path(sent_invoice)
         }.not_to change(Invoice, :count)
-
         expect(response).to redirect_to(invoice_path(sent_invoice))
       end
     end
   end
 
-  describe "PATCH /invoices/:id/send_invoice" do
-    context "facture en brouillon avec lignes" do
-      let!(:draft_invoice) { create(:invoice, organization: organization, client: client, status: :draft) }
+  describe "PATCH /invoices/:id/finalize_invoice" do
+    context "brouillon avec lignes et date d'échéance" do
+      let!(:draft_invoice) { create(:invoice, organization: organization, client: client, status: :draft, due_date: 30.days.from_now) }
       let!(:item) { create(:invoice_item, invoice: draft_invoice) }
 
-      it "marque la facture comme envoyée" do
-        patch send_invoice_invoice_path(draft_invoice)
-
+      it "finalise la facture" do
+        patch finalize_invoice_invoice_path(draft_invoice)
         draft_invoice.reload
-        expect(draft_invoice.status).to eq("sent")
-        expect(draft_invoice.sent_at).to be_present
+        expect(draft_invoice.status).to eq("finalized")
+        expect(draft_invoice.finalized_at).to be_present
+        expect(response).to redirect_to(invoice_path(draft_invoice))
+      end
+    end
 
+    context "brouillon sans lignes" do
+      let!(:empty_invoice) { create(:invoice, organization: organization, client: client, status: :draft, due_date: 30.days.from_now) }
+
+      it "refuse de finaliser" do
+        patch finalize_invoice_invoice_path(empty_invoice)
+        expect(empty_invoice.reload.status).to eq("draft")
+        expect(response).to redirect_to(invoice_path(empty_invoice))
+      end
+    end
+
+    context "brouillon sans date d'échéance" do
+      let!(:invoice_no_due) { create(:invoice, organization: organization, client: client, status: :draft, due_date: nil) }
+      let!(:item) { create(:invoice_item, invoice: invoice_no_due) }
+
+      it "refuse de finaliser" do
+        patch finalize_invoice_invoice_path(invoice_no_due)
+        expect(invoice_no_due.reload.status).to eq("draft")
+        expect(response).to redirect_to(invoice_path(invoice_no_due))
+      end
+    end
+  end
+
+  describe "PATCH /invoices/:id/send_invoice" do
+    context "facture finalisée" do
+      let!(:finalized_invoice) { create(:invoice, organization: organization, client: client, status: :finalized) }
+
+      it "marque la facture comme envoyée" do
+        patch send_invoice_invoice_path(finalized_invoice)
+        finalized_invoice.reload
+        expect(finalized_invoice.status).to eq("sent")
+        expect(finalized_invoice.sent_at).to be_present
+        expect(response).to redirect_to(invoice_path(finalized_invoice))
+      end
+    end
+
+    context "facture en brouillon" do
+      let!(:draft_invoice) { create(:invoice, organization: organization, client: client, status: :draft) }
+
+      it "ne peut pas envoyer un brouillon" do
+        patch send_invoice_invoice_path(draft_invoice)
+        expect(draft_invoice.reload.status).to eq("draft")
         expect(response).to redirect_to(invoice_path(draft_invoice))
       end
     end
@@ -128,36 +190,77 @@ RSpec.describe "Invoices", type: :request do
 
       it "ne change pas le statut" do
         patch send_invoice_invoice_path(sent_invoice)
-
         expect(sent_invoice.reload.status).to eq("sent")
         expect(response).to redirect_to(invoice_path(sent_invoice))
       end
     end
+  end
 
-    context "facture sans lignes" do
-      let!(:empty_invoice) { create(:invoice, organization: organization, client: client, status: :draft) }
+  describe "PATCH /invoices/:id/cancel_invoice" do
+    context "facture finalisée" do
+      let!(:finalized_invoice) { create(:invoice, organization: organization, client: client, status: :finalized) }
 
-      it "refuse d'envoyer une facture vide" do
-        patch send_invoice_invoice_path(empty_invoice)
+      it "annule la facture" do
+        patch cancel_invoice_invoice_path(finalized_invoice)
+        expect(finalized_invoice.reload.status).to eq("cancelled")
+        expect(response).to redirect_to(invoice_path(finalized_invoice))
+      end
+    end
 
-        expect(empty_invoice.reload.status).to eq("draft")
-        expect(response).to redirect_to(invoice_path(empty_invoice))
+    context "facture envoyée" do
+      let!(:sent_invoice) { create(:invoice, organization: organization, client: client, status: :sent) }
+
+      it "ne peut pas annuler une facture envoyée" do
+        patch cancel_invoice_invoice_path(sent_invoice)
+        expect(sent_invoice.reload.status).to eq("sent")
+        expect(response).to redirect_to(invoice_path(sent_invoice))
+      end
+    end
+  end
+
+  describe "PATCH /invoices/:id/mark_as_paid" do
+    context "facture envoyée" do
+      let!(:sent_invoice) { create(:invoice, organization: organization, client: client, status: :sent) }
+
+      it "marque la facture comme payée" do
+        patch mark_as_paid_invoice_path(sent_invoice)
+        expect(sent_invoice.reload.status).to eq("paid")
+        expect(response).to redirect_to(invoice_path(sent_invoice))
+      end
+    end
+
+    context "facture finalisée" do
+      let!(:finalized_invoice) { create(:invoice, organization: organization, client: client, status: :finalized) }
+
+      it "ne peut pas marquer comme payée sans envoi" do
+        patch mark_as_paid_invoice_path(finalized_invoice)
+        expect(finalized_invoice.reload.status).to eq("finalized")
+        expect(response).to redirect_to(invoice_path(finalized_invoice))
       end
     end
   end
 
   describe "GET /invoices/:id/download_pdf" do
-    let!(:item) { create(:invoice_item, invoice: invoice) }
+    context "facture finalisée avec lignes" do
+      let!(:finalized_invoice) { create(:invoice, organization: organization, client: client, status: :finalized) }
+      let!(:item) { create(:invoice_item, invoice: finalized_invoice) }
 
-    before { InvoiceCalculator.call(invoice) }
+      before { InvoiceCalculator.call(finalized_invoice) }
 
-    it "télécharge le PDF" do
-      get download_pdf_invoice_path(invoice)
+      it "télécharge le PDF" do
+        get download_pdf_invoice_path(finalized_invoice)
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to eq("application/pdf")
+        expect(response.headers["Content-Disposition"]).to include("facture_#{finalized_invoice.number}.pdf")
+        expect(response.body).to start_with("%PDF")
+      end
+    end
 
-      expect(response).to have_http_status(:ok)
-      expect(response.content_type).to eq("application/pdf")
-      expect(response.headers["Content-Disposition"]).to include("facture_#{invoice.number}.pdf")
-      expect(response.body).to start_with("%PDF")
+    context "facture en brouillon" do
+      it "refuse de télécharger le PDF" do
+        get download_pdf_invoice_path(invoice)
+        expect(response).to redirect_to(invoice_path(invoice))
+      end
     end
   end
 end
