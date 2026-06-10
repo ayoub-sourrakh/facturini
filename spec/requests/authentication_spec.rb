@@ -64,7 +64,7 @@ RSpec.describe "Authentication", type: :request do
     context "avec des données valides" do
       let(:valid_params) do
         {
-          organization: { name: "Test SARL", email: "contact@test.com" },
+          organization: { name: "Test SARL", email: "contact@test.com", invoice_prefix: "TST" },
           user: { first_name: "Jean", last_name: "Dupont", email: "jean@test.com",
                   password: "password123", password_confirmation: "password123" }
         }

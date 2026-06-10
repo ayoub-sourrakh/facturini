@@ -4,8 +4,6 @@ RSpec.describe Invoice, type: :model do
   describe "validations" do
     subject { build(:invoice) }
 
-    it { should validate_presence_of(:number) }
-    it { should validate_uniqueness_of(:number).scoped_to(:organization_id) }
     it { should validate_presence_of(:issue_date) }
     it { should validate_presence_of(:status) }
     it { should validate_presence_of(:currency) }

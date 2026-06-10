@@ -7,7 +7,12 @@ RSpec.describe Organization, type: :model do
     it { should validate_presence_of(:name) }
     it { should validate_presence_of(:email) }
     it { should validate_presence_of(:country) }
-    it { should validate_uniqueness_of(:email) }
+    it "valide l'unicité de l'email" do
+      create(:organization, email: "test@example.com")
+      duplicate = build(:organization, email: "test@example.com")
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors[:email]).to be_present
+    end
     it { should validate_uniqueness_of(:siret).case_insensitive }
     it { should validate_uniqueness_of(:vat_number) }
     it { should validate_length_of(:siret).is_equal_to(14) }
