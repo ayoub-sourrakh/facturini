@@ -24,8 +24,8 @@
             <td class="px-6 py-4 text-sm text-gray-700"><%= l invoice.issue_date %></td>
             <td class="px-6 py-4 text-sm text-gray-700"><%= number_to_currency(invoice.total_cents / 100.0, unit: "€") %></td>
             <td class="px-6 py-4">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= invoice.draft? ? 'bg-gray-100 text-gray-700' : 'bg-green-100 text-green-700' %>">
-                <%= invoice.status == "draft" ? "Brouillon" : "Envoyée" %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= invoice_status_badge_class(invoice) %>">
+                <%= invoice_status_label(invoice) %>
               </span>
             </td>
             <td class="px-6 py-4">
@@ -33,7 +33,7 @@
                 <%= link_to invoice_path(invoice), title: "Voir", class: "text-gray-400 hover:text-indigo-600 transition" do %>
                   <%= icon("eye", css_class: "size-4") %>
                 <% end %>
-                <% if invoice.draft? %>
+                <% if invoice.editable? %>
                   <%= link_to edit_invoice_path(invoice), title: "Modifier", class: "text-gray-400 hover:text-indigo-600 transition" do %>
                     <%= icon("pencil-square", css_class: "size-4") %>
                   <% end %>

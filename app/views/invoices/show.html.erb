@@ -3,22 +3,8 @@
     <div>
       <h1 class="text-2xl font-bold text-gray-900">Facture <%= @invoice.number %></h1>
       <p class="text-sm text-gray-500 mt-1"><%= @invoice.client.name %></p>
-      <% badge_class = case @invoice.status
-         when "draft"      then "bg-gray-100 text-gray-700"
-         when "finalized"  then "bg-indigo-100 text-indigo-700"
-         when "sent"       then "bg-green-100 text-green-700"
-         when "paid"       then "bg-violet-100 text-violet-700"
-         when "cancelled"  then "bg-red-100 text-red-700"
-         end %>
-      <% badge_label = case @invoice.status
-         when "draft"      then "Brouillon"
-         when "finalized"  then "Finalisée"
-         when "sent"       then "Envoyée"
-         when "paid"       then "Payée"
-         when "cancelled"  then "Annulée"
-         end %>
-      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2 <%= badge_class %>">
-        <%= badge_label %>
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-2 <%= invoice_status_badge_class(@invoice) %>">
+        <%= invoice_status_label(@invoice) %>
         <% if @invoice.sent_at %>
           — <%= l @invoice.sent_at, format: :short %>
         <% end %>
