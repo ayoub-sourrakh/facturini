@@ -36,11 +36,10 @@ RSpec.describe "Invoices", type: :request do
 
   describe "POST /invoices" do
     context "avec des paramètres valides" do
-      it "crée une facture en brouillon" do
+      it "crée une facture en brouillon avec un numéro auto-généré" do
         expect {
           post invoices_path, params: {
             invoice: {
-              number: "INV-002",
               client_id: client.id,
               issue_date: Date.today,
               subject: "Test facture"
@@ -48,15 +47,27 @@ RSpec.describe "Invoices", type: :request do
           }
         }.to change(Invoice, :count).by(1)
 
-        expect(Invoice.last.status).to eq("draft")
-        expect(response).to redirect_to(invoice_path(Invoice.last))
+        created = Invoice.last
+        expect(created.status).to eq("draft")
+        expect(created.number).to match(/\A[A-Z]{3}-\d{3}\z/)
+        expect(created.number).to start_with(organization.invoice_prefix)
+        expect(response).to redirect_to(invoice_path(created))
+      end
+
+      it "incrémente le numéro pour chaque nouvelle facture" do
+        post invoices_path, params: { invoice: { client_id: client.id, issue_date: Date.today } }
+        post invoices_path, params: { invoice: { client_id: client.id, issue_date: Date.today } }
+
+        numbers = Invoice.last(2).map(&:number)
+        seq = numbers.map { |n| n.split("-").last.to_i }
+        expect(seq.last).to eq(seq.first + 1)
       end
     end
 
     context "avec des paramètres invalides" do
       it "ne crée pas de facture" do
         expect {
-          post invoices_path, params: { invoice: { number: "", client_id: nil } }
+          post invoices_path, params: { invoice: { client_id: nil } }
         }.not_to change(Invoice, :count)
 
         expect(response).to have_http_status(:unprocessable_entity)

@@ -99,6 +99,6 @@ class InvoicesController < ApplicationController
   end
 
   def invoice_params
-    params.require(:invoice).permit(:number, :client_id, :issue_date, :due_date, :subject, :currency)
+    params.require(:invoice).permit(:client_id, :issue_date, :due_date, :subject, :currency)
   end
 end

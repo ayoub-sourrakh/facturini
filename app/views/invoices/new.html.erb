@@ -15,12 +15,6 @@
       <% end %>
 
       <div>
-        <%= f.label :number, "Numéro de facture", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%= f.text_field :number, required: true, placeholder: "FAC-001",
-            class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
-      </div>
-
-      <div>
         <%= f.label :client_id, "Client", class: "block text-sm font-medium text-gray-700 mb-1" %>
         <%= f.collection_select :client_id, @clients, :id, :name, { include_blank: "Sélectionner..." },
             { required: true, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" } %>

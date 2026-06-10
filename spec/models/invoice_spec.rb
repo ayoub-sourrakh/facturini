@@ -32,6 +32,30 @@ RSpec.describe Invoice, type: :model do
     it { should define_enum_for(:status).with_values(draft: 0, finalized: 1, sent: 2, paid: 3, cancelled: 4) }
   end
 
+  describe "génération du numéro" do
+    let(:org) { create(:organization, invoice_prefix: "TST") }
+    let(:client) { create(:client, organization: org) }
+
+    it "génère un numéro avec le préfixe de l'organisation" do
+      invoice = create(:invoice, organization: org, client: client)
+      expect(invoice.number).to eq("TST-001")
+    end
+
+    it "incrémente le séquence pour chaque nouvelle facture" do
+      create(:invoice, organization: org, client: client)
+      second = create(:invoice, organization: org, client: client)
+      expect(second.number).to eq("TST-002")
+    end
+
+    it "isole la séquence par organisation" do
+      other_org = create(:organization, invoice_prefix: "OTH")
+      other_client = create(:client, organization: other_org)
+      create(:invoice, organization: org, client: client)
+      invoice_other = create(:invoice, organization: other_org, client: other_client)
+      expect(invoice_other.number).to eq("OTH-001")
+    end
+  end
+
   describe "méthodes métier" do
     let(:invoice) { create(:invoice, status: :draft) }
 

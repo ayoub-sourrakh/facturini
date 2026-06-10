@@ -5,7 +5,8 @@ class Invoice < ApplicationRecord
 
   enum :status, { draft: 0, finalized: 1, sent: 2, paid: 3, cancelled: 4 }
 
-  validates :number, presence: true, uniqueness: { scope: :organization_id }
+  before_create :set_invoice_number
+
   validates :issue_date, presence: true
   validates :status, presence: true
   validates :currency, presence: true
@@ -33,5 +34,13 @@ class Invoice < ApplicationRecord
 
   def downloadable?
     finalized? || sent? || paid?
+  end
+
+  private
+
+  def set_invoice_number
+    prefix = organization.invoice_prefix
+    last = organization.invoices.maximum("CAST(SPLIT_PART(number, '-', 2) AS INTEGER)") || 0
+    self.number = "#{prefix}-#{(last + 1).to_s.rjust(3, '0')}"
   end
 end
