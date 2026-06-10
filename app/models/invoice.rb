@@ -11,11 +11,27 @@ class Invoice < ApplicationRecord
   validates :currency, presence: true
   validates :due_date, presence: true, unless: :draft?
 
-  def finalized?
-    finalized_at.present?
+  def editable?
+    draft?
   end
 
   def finalizable?
-    draft? && invoice_items.any?
+    draft? && invoice_items.any? && due_date.present?
+  end
+
+  def sendable?
+    finalized?
+  end
+
+  def cancellable?
+    finalized?
+  end
+
+  def payable?
+    sent?
+  end
+
+  def downloadable?
+    finalized? || sent? || paid?
   end
 end

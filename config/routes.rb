@@ -18,7 +18,10 @@ Rails.application.routes.draw do
   resources :invoices do
     resources :invoice_items, only: [ :create, :destroy ]
     member do
+      patch :finalize_invoice
       patch :send_invoice
+      patch :cancel_invoice
+      patch :mark_as_paid
       get :download_pdf
     end
   end

@@ -2,7 +2,7 @@ class InvoiceItemsController < ApplicationController
   before_action :set_invoice
 
   def create
-    if @invoice.draft?
+    if @invoice.editable?
       @item = @invoice.invoice_items.build(item_params)
       if @item.save
         InvoiceCalculator.call(@invoice)
@@ -16,7 +16,7 @@ class InvoiceItemsController < ApplicationController
   end
 
   def destroy
-    if @invoice.draft?
+    if @invoice.editable?
       @item = @invoice.invoice_items.find(params[:id])
       @item.destroy
       InvoiceCalculator.call(@invoice)
