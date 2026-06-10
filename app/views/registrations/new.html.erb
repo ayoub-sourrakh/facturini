@@ -4,7 +4,7 @@
 </div>
 
 <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-8">
-  <%= form_with url: registration_path, method: :post, class: "space-y-6" do |f| %>
+  <%= form_with url: registration_path, method: :post, class: "space-y-6", html: { autocomplete: "off" } do |f| %>
 
     <fieldset class="space-y-4">
       <legend class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Entreprise</legend>

@@ -4,7 +4,7 @@
 </div>
 
 <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-8">
-  <%= form_with url: session_path, method: :post, class: "space-y-5" do |f| %>
+  <%= form_with url: session_path, method: :post, class: "space-y-5", html: { autocomplete: "off" } do |f| %>
     <div>
       <%= f.label :email, "Email", class: "block text-sm font-medium text-gray-700 mb-1" %>
       <%= f.email_field :email, required: true, autofocus: true, placeholder: "vous@entreprise.com",
