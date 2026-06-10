@@ -20,14 +20,13 @@ class RegistrationsController < ApplicationController
     start_session(@user)
     redirect_to root_path, notice: "Bienvenue sur Facturini !"
   rescue ActiveRecord::RecordInvalid
-    flash.now[:alert] = "Erreur lors de l'inscription."
     render :new, status: :unprocessable_entity
   end
 
   private
 
   def organization_params
-    params.require(:organization).permit(:name, :email)
+    params.require(:organization).permit(:name, :email, :invoice_prefix)
   end
 
   def user_params

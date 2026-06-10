@@ -1,0 +1,37 @@
+fr:
+  activerecord:
+    errors:
+      messages:
+        blank: "ne peut pas être vide"
+        taken: "est déjà utilisé"
+        too_short: "est trop court (minimum %{count} caractères)"
+        too_long: "est trop long (maximum %{count} caractères)"
+        wrong_length: "n'a pas la bonne longueur (doit contenir %{count} caractères)"
+        invalid: "n'est pas valide"
+        not_a_number: "n'est pas un nombre"
+        greater_than_or_equal_to: "doit être supérieur ou égal à %{count}"
+        inclusion: "n'est pas inclus dans la liste"
+      models:
+        organization:
+          attributes:
+            name:
+              blank: "ne peut pas être vide"
+            email:
+              blank: "ne peut pas être vide"
+              taken: "est déjà utilisé"
+              invalid: "n'est pas valide"
+            invoice_prefix:
+              blank: "ne peut pas être vide"
+              wrong_length: "doit contenir exactement 3 caractères"
+              invalid: "doit contenir exactement 3 lettres majuscules"
+        user:
+          attributes:
+            email:
+              blank: "ne peut pas être vide"
+              taken: "est déjà utilisé"
+            password:
+              blank: "ne peut pas être vide"
+            first_name:
+              blank: "ne peut pas être vide"
+            last_name:
+              blank: "ne peut pas être vide"
