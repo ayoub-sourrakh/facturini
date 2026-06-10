@@ -1,12 +1,12 @@
 # Facturini
 
-Application SaaS B2B de facturation multi-tenancy construite avec Ruby on Rails 8. MVP fonctionnel avec authentification, gestion de clients et factures, calculs automatiques, génération PDF et un design system cohérent.
+Application SaaS B2B de facturation multi-tenancy construite avec Ruby on Rails 8. MVP fonctionnel avec authentification, gestion de clients et factures, workflow de statuts complet, calculs automatiques, génération PDF et un design system cohérent.
 
-## Stack Technique
+## Stack technique
 
 | Catégorie | Technologie |
 |-----------|-------------|
-| **Framework** | Ruby on Rails 8.0 |
+| **Framework** | Ruby on Rails 8.1 |
 | **Ruby** | 3.3.4 |
 | **Base de données** | PostgreSQL |
 | **CSS** | Tailwind CSS |
@@ -14,18 +14,19 @@ Application SaaS B2B de facturation multi-tenancy construite avec Ruby on Rails 
 | **Authentification** | `has_secure_password` + sessions |
 | **PDF** | Prawn + prawn-table |
 | **Tests** | RSpec, FactoryBot, Shoulda Matchers |
+| **i18n** | Rails I18n (locale `fr`) |
 
 ## Architecture
 
 ### Principes appliqués
 
 - **Service Objects** — Logique métier isolée dans `app/services/` (`InvoiceCalculator`, `InvoicePdfGenerator`)
-- **Thin Controllers** — Les contrôleurs gèrent uniquement le cycle HTTP (params, flash, redirections)
+- **Thin Controllers** — Les contrôleurs délèguent aux méthodes métier du modèle (`editable?`, `finalizable?`, etc.)
 - **Multi-tenancy** — Toutes les données scopées par `Organization`, aucun accès cross-tenant possible
-- **RESTful** — Routes `resources` standard Rails + routes `member` pour les actions custom
-- **Workflow Guards** — Contrôleurs et vues protègent les factures envoyées contre toute modification
+- **RESTful** — Routes `resources` standard Rails + routes `member` pour les transitions de workflow
+- **Business Logic in Model** — Méthodes de workflow centralisées sur `Invoice` (`editable?`, `finalizable?`, `sendable?`, `cancellable?`, `payable?`, `downloadable?`)
+- **DRY Helpers** — Badges de statut centralisés dans `IconsHelper` (`invoice_status_badge_class`, `invoice_status_label`)
 - **DRY Layouts** — Deux layouts distincts (`application` pour l'app, `auth` pour login/signup)
-- **Design System** — Composants visuels uniformes (cards, inputs, boutons, badges, icônes)
 
 ### Structure du projet
 
@@ -36,22 +37,22 @@ app/
 │   │   └── authentication.rb       # Module session/current_user/require_auth
 │   ├── application_controller.rb   # Inclut Authentication
 │   ├── sessions_controller.rb      # Login/Logout (layout: auth)
-│   ├── registrations_controller.rb # Inscription (layout: auth)
+│   ├── registrations_controller.rb # Inscription org + user (layout: auth)
 │   ├── dashboard_controller.rb     # Tableau de bord
 │   ├── clients_controller.rb       # CRUD Clients
-│   ├── invoices_controller.rb      # CRUD Factures + send_invoice + download_pdf
+│   ├── invoices_controller.rb      # CRUD + workflow (finalize, send, cancel, mark_as_paid, download_pdf)
 │   └── invoice_items_controller.rb # Ajout/suppression de lignes
 ├── models/
-│   ├── organization.rb             # Tenant principal
+│   ├── organization.rb             # Tenant principal, invoice_prefix
 │   ├── user.rb                     # has_secure_password, enum role
 │   ├── client.rb                   # enum client_type
-│   ├── invoice.rb                  # enum status, workflow methods
+│   ├── invoice.rb                  # enum status (5 états), workflow methods, numéro auto
 │   └── invoice_item.rb             # Lignes de facture
 ├── services/
 │   ├── invoice_calculator.rb       # Calcul HT, TVA, TTC en centimes
 │   └── invoice_pdf_generator.rb    # Génération PDF avec Prawn
 ├── helpers/
-│   └── icons_helper.rb             # Heroicons SVG inline via helper
+│   └── icons_helper.rb             # Heroicons SVG inline + badge helpers statut
 ├── views/
 │   ├── layouts/
 │   │   ├── application.html.erb    # Layout principal (sidebar + content)
@@ -68,10 +69,15 @@ app/
 ## Fonctionnalités
 
 ### Authentification
-- **Inscription** — Création simultanée d'une Organization et d'un User (owner) dans une transaction
+- **Inscription** — Création simultanée d'une `Organization` et d'un `User` (owner) dans une transaction atomique
 - **Login/Logout** — Authentification par email/mot de passe avec session cookie
-- **Protection** — `before_action :require_authentication` sur toutes les pages sauf login/signup
+- **Protection** — `before_action :require_authentication` sur tous les controllers sauf auth
+- **Erreurs explicites** — Les erreurs de validation sont affichées directement dans le formulaire (en français)
 - **Layout dédié** — Pages auth avec layout centré (`auth.html.erb`), sans sidebar
+
+### Organisations
+- Création lors de l'inscription avec les informations légales (SIRET, SIREN, TVA, capital, forme juridique)
+- **Préfixe de facturation** (`invoice_prefix`) — 3 lettres majuscules (ex: `FAC`, `INV`), défini à l'inscription, utilisé pour la numérotation automatique des factures
 
 ### Clients (CRUD complet)
 - Création, lecture, modification, suppression
@@ -79,17 +85,34 @@ app/
 - Types : **Particulier** / **Professionnel** (enum `client_type`)
 - Scoped à l'organization de l'utilisateur connecté
 
-### Factures (CRUD + Workflow)
-- CRUD complet avec workflow de statuts :
-  - **`draft`** (Brouillon) — Modifiable, supprimable, lignes éditables
-  - **`sent`** (Envoyée) — Lecture seule, date d'envoi enregistrée, PDF uniquement
-- Numéro de facture unique par organization
-- Dates d'émission et d'échéance
-- Objet/description optionnel
-- Actions : Envoyer, Télécharger PDF, Modifier, Supprimer
+### Factures — Workflow à 5 statuts
 
-### Lignes de facture (Invoice Items)
-- Ajout/suppression dynamique depuis la page show de la facture
+```
+draft ──► finalized ──► sent ──► paid
+              │
+              └──► cancelled
+```
+
+| Statut | Label | Couleur | Actions disponibles |
+|--------|-------|---------|---------------------|
+| `draft` | Brouillon | Gris | Modifier, Finaliser, Supprimer |
+| `finalized` | Finalisée | Indigo | Envoyer, Annuler, PDF |
+| `sent` | Envoyée | Vert | Marquer payée, PDF |
+| `paid` | Payée | Violet | PDF |
+| `cancelled` | Annulée | Rouge | — |
+
+**Règles métier (méthodes sur `Invoice`)** :
+- `editable?` — `draft?` uniquement
+- `finalizable?` — `draft?` + au moins une ligne + `due_date` présente
+- `sendable?` — `finalized?` uniquement
+- `cancellable?` — `finalized?` uniquement
+- `payable?` — `sent?` uniquement
+- `downloadable?` — `finalized?`, `sent?` ou `paid?`
+
+**Numérotation automatique** — Le numéro est généré à la création via `before_create :set_invoice_number` au format `{PREFIX}-{SEQ}` (ex: `FAC-001`, `FAC-002`). La séquence est isolée par organisation. Le champ n'est pas saisissable par l'utilisateur.
+
+### Lignes de facture
+- Ajout/suppression dynamique depuis la page show de la facture (uniquement en `draft`)
 - Champs : description, quantité, prix unitaire (en centimes), taux de TVA (%)
 - **Recalcul automatique** des totaux à chaque ajout/suppression via `InvoiceCalculator`
 
@@ -98,22 +121,22 @@ app/
 - **TVA** = Σ (total_ligne × taux_tva / 100) par ligne
 - **Total TTC** = HT + TVA
 - Stockage en **centimes (integer)** pour éviter les erreurs d'arrondi float
-- Appelé automatiquement depuis `InvoicesController` et `InvoiceItemsController`
 
 ### Génération PDF (`InvoicePdfGenerator`)
 - Génération avec Prawn + prawn-table
+- Disponible uniquement à partir du statut `finalized`
 - Contenu : informations organization, client, détails facture, tableau des lignes, totaux
-- Téléchargement via `send_data` au format `facture-{numero}.pdf`
+- Téléchargement via `send_data` au format `facture_{numero}.pdf`
 
 ### Dashboard
-- Vue tableau de bord avec compteurs : nombre de factures et de clients
+- Compteurs : nombre de factures et de clients
 - Liens rapides vers les listes
 
 ## Design System
 
 ### Layouts
-- **`application.html.erb`** — Sidebar fixe (256px) + zone de contenu principale avec flash messages centralisées
-- **`auth.html.erb`** — Layout centré verticalement/horizontalement, fond `gray-50`, max-width 448px
+- **`application.html.erb`** — Sidebar fixe (256px) + zone de contenu principale avec flash messages centralisés
+- **`auth.html.erb`** — Layout centré, fond `gray-50`, max-width 448px
 
 ### Composants visuels
 
@@ -121,16 +144,19 @@ app/
 |-----------|-----------------|
 | **Card** | `bg-white shadow-sm rounded-xl border border-gray-200` |
 | **Input** | `border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-indigo-500` |
-| **Label** | `text-sm font-medium text-gray-700 mb-1` |
 | **Bouton principal** | `bg-indigo-600 rounded-lg text-sm font-medium hover:bg-indigo-700 transition` |
+| **Bouton succès** | `bg-green-600 text-white rounded-lg hover:bg-green-700 transition` |
 | **Bouton danger** | `bg-red-50 text-red-600 rounded-lg hover:bg-red-100` |
 | **Bouton secondaire** | `bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200` |
-| **Badge** | `rounded-full text-xs font-medium` (gris/vert/indigo selon contexte) |
-| **Table** | Card avec `overflow-hidden`, `divide-y`, hover sur les lignes |
+| **Badge draft** | `bg-gray-100 text-gray-700` |
+| **Badge finalized** | `bg-indigo-100 text-indigo-700` |
+| **Badge sent** | `bg-green-100 text-green-700` |
+| **Badge paid** | `bg-violet-100 text-violet-700` |
+| **Badge cancelled** | `bg-red-100 text-red-700` |
 | **Erreurs** | `bg-red-50 border-red-200 text-red-700 rounded-lg text-sm` |
 
 ### Icônes (Heroicons)
-Icônes SVG inline via `IconsHelper` — usage : `<%= icon("eye") %>`
+SVG inline via `IconsHelper` — usage : `<%= icon("eye", css_class: "size-4") %>`
 
 | Icône | Utilisation |
 |-------|------------|
@@ -139,39 +165,41 @@ Icônes SVG inline via `IconsHelper` — usage : `<%= icon("eye") %>`
 | `users` | Sidebar — Clients |
 | `arrow-right-on-rectangle` | Sidebar — Déconnexion |
 | `eye` | Listes — Voir |
-| `pencil-square` | Listes + Show — Modifier |
-| `trash` | Listes + Show — Supprimer |
-| `arrow-down-tray` | Show facture — Télécharger PDF |
-| `paper-airplane` | Show facture — Envoyer |
-| `arrow-left` | Pages détail — Retour |
-| `x-mark` | Show facture — Supprimer une ligne |
-
-### Navigation
-- **Sidebar** avec liens actifs highlight (indigo) via `current_page?` et `request.path`
-- **Section utilisateur** en bas de sidebar (nom, organization, bouton déconnexion)
+| `pencil-square` | Modifier |
+| `trash` | Supprimer |
+| `check-circle` | Finaliser une facture |
+| `paper-airplane` | Envoyer une facture |
+| `banknotes` | Marquer comme payée |
+| `x-mark` | Annuler / Supprimer une ligne |
+| `arrow-down-tray` | Télécharger PDF |
+| `exclamation-triangle` | Avertissement (ex: due_date manquante) |
+| `arrow-left` | Retour |
 
 ## Modèles & Relations
 
 ```
 Organization
+├── invoice_prefix (string, 3 lettres majuscules, default: "FAC")
 ├── has_many :users
 ├── has_many :clients
 └── has_many :invoices
 
 User (belongs_to :organization)
 ├── has_secure_password
-└── enum role: { member: 0, admin: 1 }
+└── enum role: { member: 0, owner: 1 }
 
 Client (belongs_to :organization)
 └── enum client_type: { individual: 0, professional: 1 }
 
 Invoice (belongs_to :organization, :client)
 ├── has_many :invoice_items (dependent: :destroy)
-├── enum status: { draft: 0, sent: 1, paid: 2 }
-└── Totaux calculés par InvoiceCalculator
+├── enum status: { draft: 0, finalized: 1, sent: 2, paid: 3, cancelled: 4 }
+├── number (généré automatiquement via before_create)
+├── finalized_at, sent_at (timestamps de transition)
+└── Totaux calculés par InvoiceCalculator (en centimes)
 
 InvoiceItem (belongs_to :invoice)
-└── Champs : description, quantity, unit_price_cents, vat_rate
+└── description, quantity, unit_price_cents, vat_rate
 ```
 
 ## Routes
@@ -183,28 +211,32 @@ DELETE     /logout       → sessions#destroy
 GET/POST   /signup       → registrations#new/create
 
 # App
+GET        /             → redirect vers /dashboard
 GET        /dashboard    → dashboard#index
 
 # CRUD
-resources :clients                           # 7 routes standard
-resources :invoices do                       # 7 routes standard +
-  resources :invoice_items, only: [:create, :destroy]  # lignes nested
+resources :clients
+
+resources :invoices do
+  resources :invoice_items, only: [:create, :destroy]
   member do
-    patch :send_invoice                      # PATCH /invoices/:id/send_invoice
-    get   :download_pdf                      # GET   /invoices/:id/download_pdf
+    patch :finalize_invoice   # draft      → finalized
+    patch :send_invoice       # finalized  → sent
+    patch :cancel_invoice     # finalized  → cancelled
+    patch :mark_as_paid       # sent       → paid
+    get   :download_pdf       # finalized | sent | paid
   end
 end
-
-root → redirect("/dashboard")
 ```
 
 ## Sécurité
 
 ### Authentification
 - `has_secure_password` (bcrypt) pour le hashing des mots de passe
-- Session cookie pour maintenir la connexion
+- Session cookie httponly pour maintenir la connexion
 - `before_action :require_authentication` sur tous les controllers (sauf auth)
 - Token CSRF sur tous les formulaires
+- `autocomplete="off"` sur tous les formulaires
 
 ### Multi-tenancy
 Toutes les requêtes sont scopées à l'organization de l'utilisateur connecté :
@@ -212,14 +244,14 @@ Toutes les requêtes sont scopées à l'organization de l'utilisateur connecté 
 current_user.organization.invoices.find(params[:id])
 current_user.organization.clients.find(params[:id])
 ```
-Aucune donnée d'une autre organization n'est accessible.
+Aucune donnée d'une autre organization n'est accessible, même en manipulant les IDs.
 
 ### Workflow des factures
-Une facture marquée comme **envoyée** devient en lecture seule :
-- Modification bloquée (contrôleur + UI)
-- Ajout/suppression de lignes bloqué
-- Suppression de la facture bloquée
-- Seul le téléchargement PDF reste disponible
+Les transitions sont protégées au niveau du contrôleur **et** du modèle. Une facture non éditable bloque :
+- Toute modification via `update`
+- L'ajout/suppression de lignes via `InvoiceItemsController`
+- La suppression via `destroy`
+- Les transitions invalides (ex: `sent` → `finalize`, `draft` → `send`)
 
 ## Installation
 
@@ -242,7 +274,7 @@ L'application est accessible sur `http://localhost:3000`.
 # Lancer tous les tests
 bundle exec rspec
 
-# Avec détail
+# Avec documentation détaillée
 bundle exec rspec --format documentation
 ```
 
@@ -250,25 +282,27 @@ bundle exec rspec --format documentation
 
 | Catégorie | Fichier | Ce qui est testé |
 |-----------|---------|-----------------|
+| **Model specs** | `spec/models/invoice_spec.rb` | Validations, workflow methods, génération numéro auto |
+| **Model specs** | `spec/models/organization_spec.rb` | Validations, unicité, associations |
 | **Request specs** | `spec/requests/authentication_spec.rb` | Login, logout, inscription, protection des pages |
 | **Request specs** | `spec/requests/clients_spec.rb` | CRUD clients, validations, scoping |
-| **Request specs** | `spec/requests/invoices_spec.rb` | CRUD factures, workflow, PDF, restrictions |
+| **Request specs** | `spec/requests/invoices_spec.rb` | CRUD, workflow complet (finalize/send/cancel/pay/pdf), restrictions |
 | **Request specs** | `spec/requests/invoice_items_spec.rb` | Ajout/suppression lignes, recalcul totaux |
-| **Service specs** | `spec/services/invoice_calculator_spec.rb` | Calculs HT, TVA, TTC |
-| **Service specs** | `spec/services/invoice_pdf_generator_spec.rb` | Génération binaire PDF |
+| **Service specs** | `spec/services/invoice_calculator_spec.rb` | Calculs HT, TVA, TTC, cas limites |
+| **Service specs** | `spec/services/invoice_pdf_generator_spec.rb` | Génération binaire PDF valide |
 
 ## Roadmap
 
-- [ ] Envoi de factures par email (ActionMailer + PJ PDF)
-- [ ] Statut "Payée" avec date de paiement
+- [ ] Page de paramètres organisation (modifier préfixe, informations légales)
+- [ ] Filtres et tri sur la liste des factures (par statut, date, client)
 - [ ] Dashboard avancé (CA mensuel, factures impayées, graphiques)
+- [ ] Envoi de factures par email (ActionMailer + PJ PDF)
 - [ ] Pagination des listes (Pagy)
-- [ ] Filtres et recherche sur les listes
 - [ ] Export CSV des factures
 - [ ] Gestion des rôles (admin / member)
-- [ ] Sidebar responsive / collapsible sur mobile
-- [ ] Numérotation automatique des factures
+- [ ] Ajout rapide de client depuis le formulaire de facture (modal Turbo)
 - [ ] Mentions légales sur le PDF (CGV, conditions de paiement)
+- [ ] Sidebar responsive / collapsible sur mobile
 
 ## Licence
 
