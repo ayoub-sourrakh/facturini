@@ -304,6 +304,70 @@ bundle exec rspec --format documentation
 - [ ] Mentions légales sur le PDF (CGV, conditions de paiement)
 - [ ] Sidebar responsive / collapsible sur mobile
 
+## Déploiement
+
+L'app est déployée sur un VPS Scaleway via **Kamal** (outil de déploiement officiel Rails 8).
+
+### Infrastructure
+
+| Élément | Valeur |
+|---------|--------|
+| **Serveur** | VPS Scaleway — `51.15.98.213` |
+| **Domaine** | https://facturini.fr |
+| **Proxy** | kamal-proxy (SSL automatique via Let's Encrypt) |
+| **Base de données** | PostgreSQL 17 (container Docker) |
+| **Registry Docker** | Docker Hub — `ayoubsourrakh/facturini` |
+
+### Prérequis
+
+- Docker installé sur ta machine locale
+- Kamal installé (`gem install kamal`)
+- Accès SSH au serveur (`ssh root@51.15.98.213`)
+- Compte Docker Hub
+
+### Fichier des secrets
+
+Créer `.kamal/secrets` (jamais commité) :
+
+```bash
+RAILS_MASTER_KEY=$(cat config/master.key)
+KAMAL_REGISTRY_PASSWORD=ton_mot_de_passe_docker_hub
+POSTGRES_PASSWORD=ton_mot_de_passe_postgres
+```
+
+### Premier déploiement
+
+```bash
+kamal setup    # Configure le serveur + démarre kamal-proxy
+kamal deploy   # Build l'image, la push sur Docker Hub, démarre les containers
+```
+
+### Déploiements suivants
+
+```bash
+kamal deploy
+```
+
+### Commandes utiles
+
+```bash
+kamal app logs -f                  # Logs en temps réel
+kamal app exec --interactive --reuse "bin/rails console"  # Console Rails
+kamal app exec --interactive --reuse "bash"               # Shell dans le container
+kamal app restart                  # Redémarrer sans redéployer
+```
+
+### Points importants
+
+**Variables d'environnement** — L'app attend :
+- `RAILS_MASTER_KEY` — clé pour déchiffrer les credentials
+- `POSTGRES_PASSWORD` — mot de passe PostgreSQL (aussi utilisé par le container db)
+- `DB_HOST` — nom du container PostgreSQL (`facturini-db`)
+
+**Solid Queue désactivé** — `SOLID_QUEUE_IN_PUMA=false` dans `deploy.yml`. Le queue adapter est `:async` (jobs en mémoire). Voir `NOTES_DEPLOY.md` pour réactiver la solid trifecta.
+
+**Bug connu résolu** — Dans `config/puma.rb`, la condition est `== "true"` (string explicite) et non juste `if ENV[...]` car en Ruby une string `"false"` est truthy et lancerait solid_queue même désactivé.
+
 ## Licence
 
 Projet privé — Facturini
