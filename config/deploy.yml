@@ -9,6 +9,8 @@ servers:
 proxy:
   ssl: true
   host: facturini.fr
+  aliases:
+    - www.facturini.fr
 
 registry:
   server: docker.io

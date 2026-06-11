@@ -35,6 +35,7 @@
 
 # Ignore Kamal secrets
 /.kamal/secrets
+/NOTES_DEPLOY.md
 
 
 /app/assets/builds/*
