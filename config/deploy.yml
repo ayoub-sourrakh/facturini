@@ -19,7 +19,7 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
-    - DB_PASSWORD
+    - POSTGRES_PASSWORD
   clear:
     SOLID_QUEUE_IN_PUMA: true
     DB_HOST: facturini-db
@@ -48,6 +48,6 @@ accessories:
         POSTGRES_USER: facturini
         POSTGRES_DB: facturini_production
       secret:
-        - DB_PASSWORD
+        - POSTGRES_PASSWORD
     directories:
       - data:/var/lib/postgresql/data
