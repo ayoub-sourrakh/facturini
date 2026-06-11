@@ -23,6 +23,7 @@ env:
   clear:
     SOLID_QUEUE_IN_PUMA: false
     DB_HOST: facturini-db
+    MAINTENANCE_MODE: true
 
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
