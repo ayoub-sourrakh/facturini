@@ -4,9 +4,9 @@ Rails.application.routes.draw do
   post "login", to: "sessions#create", as: :session
   delete "logout", to: "sessions#destroy", as: :destroy_session
 
-  # Registration
-  get "signup", to: "registrations#new", as: :new_registration
-  post "signup", to: "registrations#create", as: :registration
+  # Registration (désactivé - création via console ou admin uniquement)
+  # get "signup", to: "registrations#new", as: :new_registration
+  # post "signup", to: "registrations#create", as: :registration
 
   # Dashboard (protégé)
   get "dashboard", to: "dashboard#index", as: :dashboard
@@ -25,6 +25,8 @@ Rails.application.routes.draw do
       get :download_pdf
     end
   end
+
+  resources :password_resets, only: [:new, :create, :edit, :update]
 
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
