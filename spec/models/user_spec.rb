@@ -35,6 +35,5 @@ RSpec.describe User, type: :model do
       expect(user.reset_password_sent_at).to be >= before_time
       expect(user.reset_password_sent_at).to be <= Time.current
     end
-
   end
 end

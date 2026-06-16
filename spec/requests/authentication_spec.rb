@@ -52,55 +52,6 @@ RSpec.describe "Authentication", type: :request do
     end
   end
 
-  describe "GET /signup" do
-    it "affiche le formulaire d'inscription" do
-      get new_registration_path
-      expect(response).to have_http_status(:success)
-      expect(response.body).to include("Créez votre compte")
-    end
-  end
-
-  describe "POST /signup" do
-    context "avec des données valides" do
-      let(:valid_params) do
-        {
-          organization: { name: "Test SARL", email: "contact@test.com", invoice_prefix: "TST" },
-          user: { first_name: "Jean", last_name: "Dupont", email: "jean@test.com",
-                  password: "password123", password_confirmation: "password123" }
-        }
-      end
-
-      it "crée l'organisation, l'utilisateur et connecte" do
-        expect {
-          post registration_path, params: valid_params
-        }.to change(Organization, :count).by(1).and change(User, :count).by(1)
-
-        expect(response).to redirect_to(root_path)
-
-        user = User.last
-        expect(user.role).to eq("owner")
-        expect(session[:user_id]).to eq(user.id)
-      end
-    end
-
-    context "avec des données invalides" do
-      let(:invalid_params) do
-        {
-          organization: { name: "", email: "invalid" },
-          user: { first_name: "", last_name: "", email: "", password: "short" }
-        }
-      end
-
-      it "ne crée rien et affiche les erreurs" do
-        expect {
-          post registration_path, params: invalid_params
-        }.not_to change(Organization, :count)
-
-        expect(response).to have_http_status(:unprocessable_entity)
-      end
-    end
-  end
-
   describe "Protection des pages" do
     describe "GET /dashboard" do
       context "sans être connecté" do

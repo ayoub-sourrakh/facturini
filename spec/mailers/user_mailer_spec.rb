@@ -10,7 +10,7 @@ RSpec.describe UserMailer, type: :mailer do
     end
 
     it "envoie à l'email de l'utilisateur" do
-      expect(mail.to).to eq([user.email])
+      expect(mail.to).to eq([ user.email ])
     end
 
     it "a le bon sujet" do

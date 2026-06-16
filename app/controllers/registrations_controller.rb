@@ -1,6 +1,6 @@
 class RegistrationsController < ApplicationController
   # Seuls les admins peuvent créer des comptes
-  before_action :require_admin, only: [:new, :create]
+  before_action :require_admin, only: [ :new, :create ]
 
   layout "auth"
 
