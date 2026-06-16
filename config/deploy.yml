@@ -38,11 +38,6 @@ volumes:
 
 asset_path: /rails/public/assets
 
-healthcheck:
-  path: /up
-  interval: 5s
-  timeout: 60s
-
 builder:
   arch: amd64
 
