@@ -19,4 +19,22 @@ RSpec.describe User, type: :model do
   describe "enums" do
     it { should define_enum_for(:role).with_values(member: 0, admin: 1, owner: 2) }
   end
+
+  describe "#generate_password_reset_token!" do
+    let(:user) { create(:user) }
+
+    it "génère un token unique" do
+      expect {
+        user.generate_password_reset_token!
+      }.to change { user.reset_password_token }.from(nil).to(String)
+    end
+
+    it "enregistre la date d'envoi" do
+      before_time = Time.current
+      user.generate_password_reset_token!
+      expect(user.reset_password_sent_at).to be >= before_time
+      expect(user.reset_password_sent_at).to be <= Time.current
+    end
+
+  end
 end
