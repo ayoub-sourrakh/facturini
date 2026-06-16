@@ -1,35 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Nouveau mot de passe - Facturini</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>body{font-family:system-ui,sans-serif;background:#f9fafb;display:grid;place-items:center;min-height:100vh;margin:0;padding:2rem}.card{background:white;padding:2rem;border-radius:1rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);width:100%;max-width:400px}input{width:100%;padding:0.75rem;border:1px solid #d1d5db;border-radius:0.5rem;margin-bottom:1rem}button{width:100%;padding:0.75rem;background:#4f46e5;color:white;border:none;border-radius:0.5rem;cursor:pointer}</style>
-</head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
-  <div class="w-full max-w-md">
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Facturini</h1>
-      <p class="mt-2 text-gray-600">Nouveau mot de passe</p>
+<% content_for :title, "Nouveau mot de passe - Facturini" %>
+
+<div class="text-center mb-8">
+  <h1 class="text-3xl font-bold text-gray-900">Facturini</h1>
+  <p class="mt-2 text-gray-600">Nouveau mot de passe</p>
+</div>
+
+<div class="bg-white shadow-sm rounded-xl border border-gray-200 p-8">
+  <%= form_with model: @user, url: password_reset_path(params[:id]), class: "space-y-5" do |f| %>
+    <div>
+      <%= f.label :password, "Nouveau mot de passe", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.password_field :password, required: true, placeholder: "••••••••", autocomplete: "new-password",
+          class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
     </div>
 
-    <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-8">
-      <%= form_with model: @user, url: password_reset_path(params[:id]), class: "space-y-5" do |f| %>
-        <div>
-          <%= f.label :password, "Nouveau mot de passe", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.password_field :password, required: true, placeholder: "••••••••", autocomplete: "new-password",
-              class: "block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500" %>
-        </div>
-
-        <div>
-          <%= f.label :password_confirmation, "Confirmation", class: "block text-sm font-medium text-gray-700 mb-1" %>
-          <%= f.password_field :password_confirmation, required: true, placeholder: "••••••••", autocomplete: "new-password",
-              class: "block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500" %>
-        </div>
-
-        <%= f.submit "Réinitialiser",
-            class: "w-full py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 cursor-pointer" %>
-      <% end %>
+    <div>
+      <%= f.label :password_confirmation, "Confirmation", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.password_field :password_confirmation, required: true, placeholder: "••••••••", autocomplete: "new-password",
+          class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
     </div>
-  </div>
-</body>
-</html>
+
+    <%= f.submit "Réinitialiser",
+        class: "w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+  <% end %>
+</div>

@@ -1,6 +1,6 @@
 class PasswordResetsController < ApplicationController
   skip_before_action :require_authentication
-  layout false
+  layout "auth"
 
   def new
   end
