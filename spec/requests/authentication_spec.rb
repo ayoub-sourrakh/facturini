@@ -23,7 +23,7 @@ RSpec.describe "Authentication", type: :request do
         expect(response).to redirect_to(dashboard_path)  # / redirige vers /dashboard
 
         follow_redirect!  # suit la redirection vers /dashboard
-        expect(response.body).to include("Tableau de bord - #{user.organization.name}")
+        expect(response.body).to include("Tableau de bord")
         expect(flash[:notice]).to eq("Connexion réussie.")
       end
     end

@@ -1,19 +1,19 @@
-<h2 class="text-2xl font-bold text-gray-900 mb-6">Tableau de bord - <%= @organization.name %></h2>
+<h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">Tableau de bord</h2>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
   <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
-    <p class="text-sm font-medium text-gray-500">Factures</p>
-    <p class="mt-1 text-3xl font-semibold text-gray-900"><%= @invoices_count %></p>
+    <p class="text-base font-medium text-gray-500">Factures</p>
+    <p class="mt-1 text-2xl sm:text-3xl font-semibold text-gray-900"><%= @invoices_count %></p>
     <div class="mt-4">
-      <%= link_to "Voir mes factures", invoices_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+      <%= link_to "Voir mes factures", invoices_path, class: "text-base font-medium text-primary hover:text-primary-dark" %>
     </div>
   </div>
 
   <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
-    <p class="text-sm font-medium text-gray-500">Clients</p>
-    <p class="mt-1 text-3xl font-semibold text-gray-900"><%= @clients_count %></p>
+    <p class="text-base font-medium text-gray-500">Clients</p>
+    <p class="mt-1 text-2xl sm:text-3xl font-semibold text-gray-900"><%= @clients_count %></p>
     <div class="mt-4">
-      <%= link_to "Voir mes clients", clients_path, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" %>
+      <%= link_to "Voir mes clients", clients_path, class: "text-base font-medium text-primary hover:text-primary-dark" %>
     </div>
   </div>
 </div>

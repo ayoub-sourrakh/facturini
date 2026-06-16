@@ -1,6 +1,6 @@
 <div class="flex justify-between items-center mb-6">
-  <h1 class="text-2xl font-bold text-gray-900">Mes factures</h1>
-  <%= link_to "Nouvelle facture", new_invoice_path, class: "bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition" %>
+  <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Mes factures</h1>
+  <%= link_to "Nouvelle facture", new_invoice_path, class: "bg-primary text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-primary-dark transition" %>
 </div>
 
 <% if @invoices.any? %>
@@ -19,7 +19,7 @@
       <tbody class="divide-y divide-gray-200">
         <% @invoices.each do |invoice| %>
           <tr class="hover:bg-gray-50 transition">
-            <td class="px-6 py-4 text-sm"><%= link_to invoice.number, invoice_path(invoice), class: "font-medium text-indigo-600 hover:text-indigo-500" %></td>
+            <td class="px-6 py-4 text-sm"><%= link_to invoice.number, invoice_path(invoice), class: "font-medium text-primary hover:text-primary-dark" %></td>
             <td class="px-6 py-4 text-sm text-gray-700"><%= invoice.client.name %></td>
             <td class="px-6 py-4 text-sm text-gray-700"><%= l invoice.issue_date %></td>
             <td class="px-6 py-4 text-sm text-gray-700"><%= number_to_currency(invoice.total_cents / 100.0, unit: "€") %></td>
@@ -30,11 +30,11 @@
             </td>
             <td class="px-6 py-4">
               <div class="flex items-center space-x-2">
-                <%= link_to invoice_path(invoice), title: "Voir", class: "text-gray-400 hover:text-indigo-600 transition" do %>
+                <%= link_to invoice_path(invoice), title: "Voir", class: "text-gray-400 hover:text-primary transition" do %>
                   <%= icon("eye", css_class: "size-4") %>
                 <% end %>
                 <% if invoice.editable? %>
-                  <%= link_to edit_invoice_path(invoice), title: "Modifier", class: "text-gray-400 hover:text-indigo-600 transition" do %>
+                  <%= link_to edit_invoice_path(invoice), title: "Modifier", class: "text-gray-400 hover:text-primary transition" do %>
                     <%= icon("pencil-square", css_class: "size-4") %>
                   <% end %>
                   <%= button_to invoice_path(invoice), method: :delete, title: "Supprimer",
@@ -50,5 +50,13 @@
     </table>
   </div>
 <% else %>
-  <p class="text-gray-500 text-sm">Aucune facture. <%= link_to "Créer votre première facture", new_invoice_path, class: "text-indigo-600 hover:text-indigo-500" %>.</p>
+  <div class="text-center py-16">
+    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+    </div>
+    <p class="text-lg text-gray-500 mb-4">Aucune facture pour le moment</p>
+    <%= link_to "Créer votre première facture", new_invoice_path, class: "inline-flex items-center px-6 py-3 bg-primary text-white text-base font-medium rounded-lg hover:bg-primary-dark transition" %>
+  </div>
 <% end %>

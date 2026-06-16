@@ -1,0 +1,46 @@
+<% content_for :title, "Mentions Légales - Facturini" %>
+
+<section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-8">
+      <%= link_to root_path do %>
+        <%= image_tag "facturini_logo_text_only.svg", class: "h-12 w-auto mx-auto", alt: "Facturini" %>
+      <% end %>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Mentions Légales</h1>
+    
+    <div class="bg-white rounded-xl border border-gray-200 p-8 space-y-6 text-gray-600">
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">Éditeur du site</h2>
+        <p>Facturini</p>
+        <p>[À compléter : Forme juridique]</p>
+        <p>[À compléter : Adresse du siège social]</p>
+        <p>[À compléter : Numéro SIRET]</p>
+        <p>Email : <a href="mailto:contact@facturini.fr" class="text-primary hover:text-primary-dark">contact@facturini.fr</a></p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">Hébergement</h2>
+        <p>[À compléter : Nom de l'hébergeur]</p>
+        <p>[À compléter : Adresse de l'hébergeur]</p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">Directeur de publication</h2>
+        <p>[À compléter : Nom du directeur de publication]</p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">Propriété intellectuelle</h2>
+        <p>L'ensemble du site, y compris la structure et le contenu, est protégé par le droit d'auteur et le droit des marques. Toute reproduction totale ou partielle sans autorisation préalable est interdite.</p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">CNIL</h2>
+        <p>Conformément à la loi Informatique et Libertés, le site a fait l'objet d'une déclaration auprès de la CNIL sous le numéro [À compléter].</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%= render "layouts/footer" %>

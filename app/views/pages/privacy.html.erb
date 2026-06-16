@@ -1,0 +1,53 @@
+<% content_for :title, "Politique de Confidentialité - Facturini" %>
+
+<section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-8">
+      <%= link_to root_path do %>
+        <%= image_tag "facturini_logo_text_only.svg", class: "h-12 w-auto mx-auto", alt: "Facturini" %>
+      <% end %>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Politique de Confidentialité</h1>
+    
+    <div class="bg-white rounded-xl border border-gray-200 p-8 space-y-6 text-gray-600">
+      <p class="text-sm text-gray-500">Dernière mise à jour : <%= Time.current.year %></p>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">1. Collecte des données</h2>
+        <p>Nous collectons uniquement les données nécessaires au fonctionnement du service :</p>
+        <ul class="list-disc list-inside mt-2 space-y-1">
+          <li>Informations de compte (email, nom, prénom)</li>
+          <li>Informations de facturation (clients, produits, montants)</li>
+          <li>Données de connexion (logs techniques)</li>
+        </ul>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">2. Utilisation des données</h2>
+        <p>Vos données sont utilisées uniquement pour :</p>
+        <ul class="list-disc list-inside mt-2 space-y-1">
+          <li>Fournir le service de facturation</li>
+          <li>Assurer la sécurité de votre compte</li>
+          <li>Communiquer avec vous concernant le service</li>
+        </ul>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">3. Sécurité</h2>
+        <p>Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles pour protéger vos données : chiffrement, sauvegardes régulières, accès restreints.</p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">4. Vos droits</h2>
+        <p>Vous disposez d'un droit d'accès, de rectification, de suppression et de portabilité de vos données. Contactez-nous à <a href="mailto:privacy@facturini.fr" class="text-primary hover:text-primary-dark">privacy@facturini.fr</a>.</p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">5. Cookies</h2>
+        <p>Nous utilisons des cookies techniques essentiels au fonctionnement du service. Aucun cookie de traçage publicitaire n'est utilisé.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%= render "layouts/footer" %>

@@ -1,0 +1,46 @@
+<% content_for :title, "Conditions Générales - Facturini" %>
+
+<section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-8">
+      <%= link_to root_path do %>
+        <%= image_tag "facturini_logo_text_only.svg", class: "h-12 w-auto mx-auto", alt: "Facturini" %>
+      <% end %>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Conditions Générales de Vente</h1>
+    
+    <div class="bg-white rounded-xl border border-gray-200 p-8 space-y-6 text-gray-600">
+      <p class="text-sm text-gray-500">Dernière mise à jour : <%= Time.current.year %></p>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">1. Présentation du service</h2>
+        <p>Facturini est un service en ligne de gestion et de facturation destiné aux indépendants et petites entreprises. L'utilisateur peut créer, gérer et envoyer des factures professionnelles.</p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">2. Accès au service</h2>
+        <p>L'accès au service est réservé aux utilisateurs disposant d'un compte. La création de compte est soumise à validation par l'administrateur.</p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">3. Tarification</h2>
+        <p>[À compléter : Gratuit / Freemium / Abonnement]</p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">4. Responsabilités</h2>
+        <p>L'utilisateur est seul responsable des factures émises via le service. Facturini ne saurait être tenu responsable des erreurs de saisie ou de l'utilisation frauduleuse du service.</p>
+      </div>
+      
+      <div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-3">5. Données personnelles</h2>
+        <p>Les données sont stockées de manière sécurisée. L'utilisateur reste propriétaire de ses données et peut demander leur suppression à tout moment.</p>
+      </div>
+      
+      <div class="pt-4 border-t border-gray-200">
+        <p class="text-sm">Pour toute question : <a href="mailto:contact@facturini.fr" class="text-primary hover:text-primary-dark">contact@facturini.fr</a></p>
+    </div>
+  </div>
+</section>
+
+<%= render "layouts/footer" %>

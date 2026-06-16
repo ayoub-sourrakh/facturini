@@ -1,6 +1,6 @@
 <div class="flex justify-between items-center mb-6">
-  <h1 class="text-2xl font-bold text-gray-900">Mes clients</h1>
-  <%= link_to "Nouveau client", new_client_path, class: "bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition" %>
+  <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Mes clients</h1>
+  <%= link_to "Nouveau client", new_client_path, class: "bg-primary text-white px-5 py-2.5 rounded-lg text-base font-medium hover:bg-primary-dark transition" %>
 </div>
 
 <% if @clients.any? %>
@@ -18,16 +18,16 @@
       <tbody class="divide-y divide-gray-200">
         <% @clients.each do |client| %>
           <tr class="hover:bg-gray-50 transition">
-            <td class="px-6 py-4 text-sm"><%= link_to client.name, client_path(client), class: "font-medium text-indigo-600 hover:text-indigo-500" %></td>
+            <td class="px-6 py-4 text-sm"><%= link_to client.name, client_path(client), class: "font-medium text-primary hover:text-primary-dark" %></td>
             <td class="px-6 py-4 text-sm text-gray-700"><%= client.email %></td>
             <td class="px-6 py-4 text-sm text-gray-700"><%= client.phone %></td>
             <td class="px-6 py-4 text-sm text-gray-700"><%= client.client_type == "professional" ? "Professionnel" : "Particulier" %></td>
             <td class="px-6 py-4">
               <div class="flex items-center space-x-2">
-                <%= link_to client_path(client), title: "Voir", class: "text-gray-400 hover:text-indigo-600 transition" do %>
+                <%= link_to client_path(client), title: "Voir", class: "text-gray-400 hover:text-primary transition" do %>
                   <%= icon("eye", css_class: "size-4") %>
                 <% end %>
-                <%= link_to edit_client_path(client), title: "Modifier", class: "text-gray-400 hover:text-indigo-600 transition" do %>
+                <%= link_to edit_client_path(client), title: "Modifier", class: "text-gray-400 hover:text-primary transition" do %>
                   <%= icon("pencil-square", css_class: "size-4") %>
                 <% end %>
                 <%= button_to client_path(client), method: :delete, title: "Supprimer",
@@ -42,5 +42,13 @@
     </table>
   </div>
 <% else %>
-  <p class="text-gray-500 text-sm">Aucun client. <%= link_to "Créer votre premier client", new_client_path, class: "text-indigo-600 hover:text-indigo-500" %>.</p>
+  <div class="text-center py-16">
+    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+      </svg>
+    </div>
+    <p class="text-lg text-gray-500 mb-4">Aucun client pour le moment</p>
+    <%= link_to "Créer votre premier client", new_client_path, class: "inline-flex items-center px-6 py-3 bg-primary text-white text-base font-medium rounded-lg hover:bg-primary-dark transition" %>
+  </div>
 <% end %>

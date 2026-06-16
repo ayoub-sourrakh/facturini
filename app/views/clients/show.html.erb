@@ -1,14 +1,14 @@
 <div class="max-w-2xl mx-auto">
   <div class="flex justify-between items-start mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900"><%= @client.name %></h1>
-      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 <%= @client.client_type == 'professional' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700' %>">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900"><%= @client.name %></h1>
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 <%= @client.client_type == 'professional' ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-700' %>">
         <%= @client.client_type == "professional" ? "Professionnel" : "Particulier" %>
       </span>
     </div>
     <div class="flex items-center space-x-2">
       <%= link_to edit_client_path(@client),
-          class: "inline-flex items-center space-x-1.5 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition" do %>
+          class: "inline-flex items-center space-x-1.5 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition" do %>
         <%= icon("pencil-square", css_class: "size-4") %>
         <span>Modifier</span>
       <% end %>

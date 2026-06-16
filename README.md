@@ -11,6 +11,8 @@ Application SaaS B2B de facturation multi-tenancy construite avec Ruby on Rails 
 | **Base de données** | PostgreSQL |
 | **CSS** | Tailwind CSS |
 | **Icônes** | Heroicons (SVG inline) |
+| **Email** | ActionMailer + Brevo SMTP |
+| **Password Reset** | Token-based reset flow |
 | **Authentification** | `has_secure_password` + sessions |
 | **PDF** | Prawn + prawn-table |
 | **Tests** | RSpec, FactoryBot, Shoulda Matchers |
@@ -26,7 +28,10 @@ Application SaaS B2B de facturation multi-tenancy construite avec Ruby on Rails 
 - **RESTful** — Routes `resources` standard Rails + routes `member` pour les transitions de workflow
 - **Business Logic in Model** — Méthodes de workflow centralisées sur `Invoice` (`editable?`, `finalizable?`, `sendable?`, `cancellable?`, `payable?`, `downloadable?`)
 - **DRY Helpers** — Badges de statut centralisés dans `IconsHelper` (`invoice_status_badge_class`, `invoice_status_label`)
-- **DRY Layouts** — Deux layouts distincts (`application` pour l'app, `auth` pour login/signup)
+- **DRY Layouts** — Trois layouts distincts (`application`, `auth`, `landing`)
+- **Responsive Design** — Mobile-first avec menu burger et sidebar adaptable
+- **Branding** — Couleurs personnalisées Tailwind (`#0A3966`, `#27AE60`)
+- **DRY Footer** — Composant partagé avec liens légaux et réseaux sociaux
 
 ### Structure du projet
 
@@ -56,7 +61,9 @@ app/
 ├── views/
 │   ├── layouts/
 │   │   ├── application.html.erb    # Layout principal (sidebar + content)
-│   │   └── auth.html.erb           # Layout authentification (centré)
+│   │   ├── auth.html.erb           # Layout authentification (centré)
+│   │   ├── landing.html.erb        # Layout landing page (full width)
+│   │   └── _footer.html.erb        # Composant footer partagé
 │   ├── sessions/                   # Login
 │   ├── registrations/              # Inscription
 │   ├── dashboard/                  # Tableau de bord
@@ -74,6 +81,8 @@ app/
 - **Protection** — `before_action :require_authentication` sur tous les controllers sauf auth
 - **Erreurs explicites** — Les erreurs de validation sont affichées directement dans le formulaire (en français)
 - **Layout dédié** — Pages auth avec layout centré (`auth.html.erb`), sans sidebar
+- **Logo cliquable** — Redirection vers la home page depuis le login
+- **Couleurs de marque** — Boutons et focus utilisant les couleurs `#0A3966` et `#27AE60`
 
 ### Organisations
 - Création lors de l'inscription avec les informations légales (SIRET, SIREN, TVA, capital, forme juridique)
@@ -131,12 +140,25 @@ draft ──► finalized ──► sent ──► paid
 ### Dashboard
 - Compteurs : nombre de factures et de clients
 - Liens rapides vers les listes
+- Textes et compteurs responsive (mobile/desktop)
+
+### Landing Page
+- **Page d'accueil publique** avec logo, slogan, CTA vers connexion
+- **Section features** présentant les avantages (factures, clients, responsive)
+- **Footer pro** avec liens légaux et réseaux sociaux
+- **Logo complet** sur la landing, **logo texte-only** dans l'app
+
+### Pages Légales
+- **CGV** (`/cgv`) — Conditions Générales de Vente
+- **Confidentialité** (`/confidentialite`) — Politique de confidentialité RGPD
+- **Mentions légales** (`/mentions-legales`) — Informations éditeur/hébergement
 
 ## Design System
 
 ### Layouts
-- **`application.html.erb`** — Sidebar fixe (256px) + zone de contenu principale avec flash messages centralisés
+- **`application.html.erb`** — Sidebar fixe (256px) + zone de contenu principale
 - **`auth.html.erb`** — Layout centré, fond `gray-50`, max-width 448px
+- **`landing.html.erb`** — Layout pleine largeur pour landing page
 
 ### Composants visuels
 
@@ -149,7 +171,9 @@ draft ──► finalized ──► sent ──► paid
 | **Bouton danger** | `bg-red-50 text-red-600 rounded-lg hover:bg-red-100` |
 | **Bouton secondaire** | `bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200` |
 | **Badge draft** | `bg-gray-100 text-gray-700` |
-| **Badge finalized** | `bg-indigo-100 text-indigo-700` |
+| **Badge finalized** | `bg-primary/10 text-primary` |
+| **Couleur primary** | `#0A3966` (bleu marine) |
+| **Couleur accent** | `#27AE60` (vert) |
 | **Badge sent** | `bg-green-100 text-green-700` |
 | **Badge paid** | `bg-violet-100 text-violet-700` |
 | **Badge cancelled** | `bg-red-100 text-red-700` |
@@ -293,6 +317,11 @@ bundle exec rspec --format documentation
 
 ## Roadmap
 
+- [x] **Landing page** avec présentation SaaS et footer pro
+- [x] **Logo et branding** — Couleurs personnalisées, favicon, logos SVG
+- [x] **Responsive design** — Menu mobile burger, textes adaptatifs
+- [x] **Pages légales** — CGV, Confidentialité, Mentions légales
+- [x] **Password reset** — Email + token sécurisé
 - [ ] Page de paramètres organisation (modifier préfixe, informations légales)
 - [ ] Filtres et tri sur la liste des factures (par statut, date, client)
 - [ ] Dashboard avancé (CA mensuel, factures impayées, graphiques)
@@ -302,7 +331,6 @@ bundle exec rspec --format documentation
 - [ ] Gestion des rôles (admin / member)
 - [ ] Ajout rapide de client depuis le formulaire de facture (modal Turbo)
 - [ ] Mentions légales sur le PDF (CGV, conditions de paiement)
-- [ ] Sidebar responsive / collapsible sur mobile
 
 ## Déploiement
 

@@ -31,6 +31,11 @@ Rails.application.routes.draw do
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Root redirige vers dashboard si connecté, sinon login
-  root to: redirect("/dashboard")
+  # Pages légales
+  get "mentions-legales", to: "pages#legal", as: :legal
+  get "cgv", to: "pages#terms", as: :terms
+  get "confidentialite", to: "pages#privacy", as: :privacy
+
+  # Page d'accueil publique
+  root to: "pages#home"
 end

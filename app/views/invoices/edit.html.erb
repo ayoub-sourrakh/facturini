@@ -1,5 +1,5 @@
 <div class="max-w-2xl mx-auto">
-  <h1 class="text-2xl font-bold text-gray-900 mb-6">Modifier la facture <%= @invoice.number %></h1>
+  <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Modifier la facture <%= @invoice.number %></h1>
 
   <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-8">
     <%= form_with model: @invoice, class: "space-y-5", html: { autocomplete: "off" } do |f| %>
@@ -17,31 +17,31 @@
       <div>
         <%= f.label :client_id, "Client", class: "block text-sm font-medium text-gray-700 mb-1" %>
         <%= f.collection_select :client_id, @clients, :id, :name, { include_blank: "Sélectionner..." },
-            { required: true, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" } %>
+            { required: true, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" } %>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div>
           <%= f.label :issue_date, "Date d'émission", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= f.date_field :issue_date, required: true,
-              class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
+              class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
         <div>
           <%= f.label :due_date, "Date d'échéance", class: "block text-sm font-medium text-gray-700 mb-1" %>
           <%= f.date_field :due_date,
-              class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
+              class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
         </div>
       </div>
 
       <div>
         <%= f.label :subject, "Objet", class: "block text-sm font-medium text-gray-700 mb-1" %>
         <%= f.text_field :subject,
-            class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" %>
+            class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
       </div>
 
       <div class="flex items-center space-x-4 pt-2">
         <%= f.submit "Mettre à jour",
-            class: "bg-indigo-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-indigo-700 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            class: "bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-dark transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" %>
         <%= link_to "Annuler", invoice_path(@invoice), class: "text-sm text-gray-500 hover:text-gray-700" %>
       </div>
     <% end %>

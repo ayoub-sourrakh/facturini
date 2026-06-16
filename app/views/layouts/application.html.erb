@@ -6,37 +6,53 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
-    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="<%= asset_path 'facturini_logo_no_text.svg' %>" type="image/svg+xml">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="bg-gray-50 min-h-screen flex">
+  <body class="bg-gray-50 min-h-screen flex flex-col md:flex-row">
+    <!-- Header Mobile -->
+    <header class="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+      <%= link_to dashboard_path, class: "text-xl font-bold text-gray-900 tracking-tight" do %>
+        <%= image_tag "facturini_logo_text_only.svg", class: "h-7 sm:h-9 w-auto", alt: "Facturini" %>
+      <% end %>
+      <button id="mobile-menu-btn" class="p-2 text-gray-600 hover:text-gray-900 focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </header>
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-gray-200 min-h-screen flex flex-col justify-between">
+    <aside id="sidebar" class="hidden md:flex w-64 bg-white border-r border-gray-200 min-h-screen flex-col justify-between fixed md:relative right-0 left-auto md:left-0 md:right-auto inset-y-0 z-50 md:z-auto">
       <div>
         <!-- Logo -->
-        <div class="px-6 py-5 border-b border-gray-200">
+        <div class="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
           <%= link_to dashboard_path, class: "text-xl font-bold text-gray-900 tracking-tight" do %>
-            Facturini
+            <%= image_tag "facturini_logo_text_only.svg", class: "h-7 sm:h-9 w-auto", alt: "Facturini" %>
           <% end %>
+          <button id="mobile-menu-close" class="md:hidden p-2 text-gray-600 hover:text-gray-900">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
 
         <!-- Navigation -->
-        <nav class="px-4 py-4 space-y-1">
+        <nav class="px-3 py-4 space-y-2">
           <%= link_to dashboard_path,
-              class: "flex items-center px-3 py-2 text-sm font-medium rounded-lg #{current_page?(dashboard_path) ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100'}" do %>
-            <%= icon("chart-bar", css_class: "size-5 shrink-0") %> <span class="ml-3">Tableau de bord</span>
+              class: "flex items-center px-4 py-3 text-base font-medium rounded-lg #{current_page?(dashboard_path) ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-100'}" do %>
+            <%= icon("chart-bar", css_class: "size-6 shrink-0") %> <span class="ml-4">Tableau de bord</span>
           <% end %>
 
           <%= link_to invoices_path,
-              class: "flex items-center px-3 py-2 text-sm font-medium rounded-lg #{request.path.start_with?('/invoices') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100'}" do %>
-            <%= icon("document-text", css_class: "size-5 shrink-0") %> <span class="ml-3">Factures</span>
+              class: "flex items-center px-4 py-3 text-base font-medium rounded-lg #{request.path.start_with?('/invoices') ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-100'}" do %>
+            <%= icon("document-text", css_class: "size-6 shrink-0") %> <span class="ml-4">Factures</span>
           <% end %>
 
           <%= link_to clients_path,
-              class: "flex items-center px-3 py-2 text-sm font-medium rounded-lg #{request.path.start_with?('/clients') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100'}" do %>
-            <%= icon("users", css_class: "size-5 shrink-0") %> <span class="ml-3">Clients</span>
+              class: "flex items-center px-4 py-3 text-base font-medium rounded-lg #{request.path.start_with?('/clients') ? 'bg-primary/10 text-primary' : 'text-gray-700 hover:bg-gray-100'}" do %>
+            <%= icon("users", css_class: "size-6 shrink-0") %> <span class="ml-4">Clients</span>
           <% end %>
         </nav>
       </div>
@@ -45,12 +61,12 @@
       <% if signed_in? %>
         <div class="px-4 py-4 border-t border-gray-200">
           <div class="flex items-center justify-between">
-            <div class="text-sm">
+            <div class="text-base">
               <p class="font-medium text-gray-900"><%= current_user.first_name %> <%= current_user.last_name %></p>
-              <p class="text-gray-500 text-xs"><%= current_user.organization.name %></p>
+              <p class="text-gray-500 text-sm"><%= current_user.organization.name %></p>
             </div>
-            <%= button_to destroy_session_path, method: :delete, class: "text-gray-400 hover:text-red-600 text-sm" do %>
-              <%= icon("arrow-right-on-rectangle", css_class: "size-5") %>
+            <%= button_to destroy_session_path, method: :delete, class: "text-gray-400 hover:text-red-600" do %>
+              <%= icon("arrow-right-on-rectangle", css_class: "size-6") %>
             <% end %>
           </div>
         </div>
@@ -58,8 +74,16 @@
     </aside>
 
     <!-- Main content -->
-    <main class="flex-1 overflow-y-auto">
-      <div class="max-w-7xl mx-auto px-6 py-8">
+    <main class="flex-1 overflow-y-auto w-full">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+        <script>
+          document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('hidden');
+          });
+          document.getElementById('mobile-menu-close')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.add('hidden');
+          });
+        </script>
         <% if flash[:alert] %>
           <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
             <%= flash[:alert] %>
