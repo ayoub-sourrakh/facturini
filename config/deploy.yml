@@ -40,9 +40,8 @@ asset_path: /rails/public/assets
 
 healthcheck:
   path: /up
-  port: 80
   interval: 5s
-  max_attempts: 12
+  timeout: 60s
 
 builder:
   arch: amd64
