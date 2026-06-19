@@ -16,6 +16,7 @@ class UsersController < ApplicationController
 
   def create
     @user = current_user.admin? ? User.new(user_params) : current_user.organization.users.build(user_params)
+    assign_role(@user)
 
     if @user.save
       redirect_to users_path, notice: "Utilisateur créé avec succès."
@@ -33,6 +34,7 @@ class UsersController < ApplicationController
       params[:user].delete(:password_confirmation)
     end
 
+    assign_role(@user)
     if @user.update(user_params)
       redirect_to users_path, notice: "Utilisateur mis à jour."
     else
@@ -66,8 +68,13 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    permitted = [ :first_name, :last_name, :email, :password, :password_confirmation ]
-    permitted << :role if current_user.admin? || current_user.owner?
-    params.require(:user).permit(*permitted)
+    params.require(:user).permit(:first_name, :last_name, :email, :password, :password_confirmation)
+  end
+
+  def assign_role(user)
+    return unless current_user.admin? || current_user.owner?
+    return unless params[:user][:role].present?
+    role = params[:user][:role]
+    user.role = role if User.roles.key?(role)
   end
 end
