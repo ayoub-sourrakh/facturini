@@ -10,5 +10,13 @@ FactoryBot.define do
     trait :owner do
       role { :owner }
     end
+
+    trait :admin do
+      role { :admin }
+    end
+
+    trait :without_org do
+      organization { nil }
+    end
   end
 end

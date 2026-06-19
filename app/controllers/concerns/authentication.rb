@@ -22,6 +22,12 @@ module Authentication
     end
   end
 
+  def require_organization
+    if signed_in? && current_user.organization.nil? && !current_user.admin?
+      redirect_to dashboard_path, alert: "Votre compte n'est associé à aucune organisation."
+    end
+  end
+
   def start_session(user)
     session[:user_id] = user.id
   end

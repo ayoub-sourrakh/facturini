@@ -1,5 +1,6 @@
 class Client < ApplicationRecord
   belongs_to :organization
+  has_many :invoices, dependent: :destroy
 
   enum :client_type, { individual: 0, professional: 1 }
 

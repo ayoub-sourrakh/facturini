@@ -1,0 +1,138 @@
+<div class="max-w-3xl mx-auto space-y-8">
+  <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Mon profil</h1>
+
+  <%# Section profil utilisateur %>
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-8">
+    <h2 class="text-base font-semibold text-gray-900 mb-6">Informations personnelles</h2>
+
+    <% if @user_errors %>
+      <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg text-sm mb-6">
+        <ul class="list-disc ml-5">
+          <% current_user.errors.full_messages.each do |msg| %>
+            <li><%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form_with url: profile_path, method: :patch, class: "space-y-5" do |f| %>
+      <%= hidden_field_tag :section, "user" %>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <%= label_tag :user_first_name, "Prénom", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= text_field_tag "user[first_name]", current_user.first_name, required: true, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+        </div>
+        <div>
+          <%= label_tag :user_last_name, "Nom", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= text_field_tag "user[last_name]", current_user.last_name, required: true, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+        </div>
+      </div>
+
+      <div>
+        <%= label_tag :user_email, "Email", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%= email_field_tag "user[email]", current_user.email, required: true, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+      </div>
+
+      <div class="border-t border-gray-100 pt-5">
+        <p class="text-sm font-medium text-gray-700 mb-4">Changer le mot de passe <span class="text-gray-400 font-normal">(laisser vide pour ne pas changer)</span></p>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <%= label_tag :user_password, "Nouveau mot de passe", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= password_field_tag "user[password]", nil, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :user_password_confirmation, "Confirmer", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= password_field_tag "user[password_confirmation]", nil, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <%= submit_tag "Enregistrer", class: "bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-dark transition cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Section organisation (owner et admin seulement) %>
+  <% if (current_user.owner? || current_user.admin?) && current_user.organization.present? %>
+    <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-8">
+      <h2 class="text-base font-semibold text-gray-900 mb-6">Mon organisation</h2>
+
+      <% if @organization_errors %>
+        <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg text-sm mb-6">
+          <ul class="list-disc ml-5">
+            <% current_user.organization.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%= form_with url: profile_path, method: :patch, class: "space-y-5" do |f| %>
+        <%= hidden_field_tag :section, "organization" %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <%= label_tag :org_name, "Nom", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= text_field_tag "organization[name]", current_user.organization.name, required: true, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :org_email, "Email", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= email_field_tag "organization[email]", current_user.organization.email, required: true, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :org_phone, "Téléphone", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= telephone_field_tag "organization[phone]", current_user.organization.phone, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :org_invoice_prefix, "Préfixe factures", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= text_field_tag "organization[invoice_prefix]", current_user.organization.invoice_prefix, maxlength: 3, required: true, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary uppercase" %>
+          </div>
+          <div>
+            <%= label_tag :org_siret, "SIRET", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= text_field_tag "organization[siret]", current_user.organization.siret, maxlength: 14, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :org_siren, "SIREN", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= text_field_tag "organization[siren]", current_user.organization.siren, maxlength: 9, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :org_vat_number, "Numéro TVA", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= text_field_tag "organization[vat_number]", current_user.organization.vat_number, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :org_legal_form, "Forme juridique", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= text_field_tag "organization[legal_form]", current_user.organization.legal_form, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :org_capital, "Capital social (€)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= number_field_tag "organization[capital]", current_user.organization.capital, min: 0, step: 0.01, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :org_country, "Pays", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= text_field_tag "organization[country]", current_user.organization.country.presence || "FR", class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+        </div>
+
+        <div>
+          <%= label_tag :org_address, "Adresse", class: "block text-sm font-medium text-gray-700 mb-1" %>
+          <%= text_area_tag "organization[address]", current_user.organization.address, rows: 2, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <%= label_tag :org_city, "Ville", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= text_field_tag "organization[city]", current_user.organization.city, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+          <div>
+            <%= label_tag :org_zip_code, "Code postal", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= text_field_tag "organization[zip_code]", current_user.organization.zip_code, class: "block w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" %>
+          </div>
+        </div>
+
+        <div>
+          <%= submit_tag "Enregistrer", class: "bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-dark transition cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

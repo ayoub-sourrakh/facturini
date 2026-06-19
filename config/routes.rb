@@ -26,6 +26,10 @@ Rails.application.routes.draw do
     end
   end
 
+  resource :profile, only: [ :show, :update ]
+  resources :users, only: [ :index, :new, :create, :edit, :update, :destroy ]
+  resources :organizations, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+
   resources :password_resets, only: [ :new, :create, :edit, :update ]
 
   # Health check

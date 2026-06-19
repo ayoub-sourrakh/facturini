@@ -13,7 +13,7 @@ RSpec.describe User, type: :model do
   end
 
   describe "associations" do
-    it { should belong_to(:organization) }
+    it { should belong_to(:organization).optional }
   end
 
   describe "enums" do

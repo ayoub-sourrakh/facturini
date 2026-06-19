@@ -1,4 +1,5 @@
 class ClientsController < ApplicationController
+  before_action :require_organization
   before_action :set_client, only: [ :show, :edit, :update, :destroy ]
 
   def index

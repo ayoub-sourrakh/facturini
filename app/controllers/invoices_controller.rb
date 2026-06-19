@@ -1,4 +1,5 @@
 class InvoicesController < ApplicationController
+  before_action :require_organization
   before_action :set_invoice, only: [ :show, :edit, :update, :destroy, :finalize_invoice, :send_invoice, :cancel_invoice, :mark_as_paid, :download_pdf ]
 
   def index

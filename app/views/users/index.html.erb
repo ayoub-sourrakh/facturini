@@ -1,0 +1,65 @@
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Utilisateurs</h1>
+    <%= link_to new_user_path, class: "inline-flex items-center space-x-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-dark transition" do %>
+      <%= icon("plus", css_class: "size-4") %>
+      <span>Nouvel utilisateur</span>
+    <% end %>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+          <% if current_user.admin? %>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organisation</th>
+          <% end %>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @users.each do |user| %>
+          <tr class="hover:bg-gray-50 transition">
+            <td class="px-6 py-4 text-sm font-medium text-gray-900">
+              <%= "#{user.first_name} #{user.last_name}" %>
+              <% if user == current_user %>
+                <span class="ml-2 text-xs text-gray-400">(vous)</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-700"><%= user.email %></td>
+            <% if current_user.admin? %>
+              <td class="px-6 py-4 text-sm text-gray-700"><%= user.organization&.name || "—" %></td>
+            <% end %>
+            <td class="px-6 py-4 text-sm">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                <%= user.owner? ? 'bg-primary/10 text-primary' : user.admin? ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700' %>">
+                <%= user.owner? ? "Propriétaire" : user.admin? ? "Admin" : "Membre" %>
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex items-center justify-end space-x-2">
+                <%= link_to edit_user_path(user), class: "inline-flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-200 transition" do %>
+                  <%= icon("pencil-square", css_class: "size-4") %>
+                  <span>Modifier</span>
+                <% end %>
+                <% unless user == current_user %>
+                  <%= button_to user_path(user), method: :delete,
+                      class: "inline-flex items-center space-x-1 bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-100 transition",
+                      form: { data: { turbo_confirm: "Supprimer #{user.first_name} #{user.last_name} ?" } } do %>
+                    <%= icon("trash", css_class: "size-4") %>
+                    <span>Supprimer</span>
+                  <% end %>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
