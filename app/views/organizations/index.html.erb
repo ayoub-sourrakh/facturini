@@ -1,0 +1,57 @@
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Organisations</h1>
+    <%= link_to new_organization_path, class: "inline-flex items-center space-x-2 bg-primary text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-primary-dark transition" do %>
+      <%= icon("plus", css_class: "size-4") %>
+      <span>Nouvelle organisation</span>
+    <% end %>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organisation</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Préfixe</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Membres</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @organizations.each do |org| %>
+          <tr class="hover:bg-gray-50 transition">
+            <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= org.name %></td>
+            <td class="px-6 py-4 text-sm text-gray-700"><%= org.email %></td>
+            <td class="px-6 py-4 text-sm text-gray-700">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                <%= org.invoice_prefix %>
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-700"><%= org.users.count %></td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex items-center justify-end space-x-2">
+                <%= link_to organization_path(org), class: "inline-flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-200 transition" do %>
+                  <%= icon("eye", css_class: "size-4") %>
+                  <span>Voir</span>
+                <% end %>
+                <%= link_to edit_organization_path(org), class: "inline-flex items-center space-x-1 bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-200 transition" do %>
+                  <%= icon("pencil-square", css_class: "size-4") %>
+                  <span>Modifier</span>
+                <% end %>
+                <%= button_to organization_path(org), method: :delete,
+                    class: "inline-flex items-center space-x-1 bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-100 transition",
+                    form: { data: { turbo_confirm: "Supprimer #{org.name} et tous ses membres, clients et factures ?" } } do %>
+                  <%= icon("trash", css_class: "size-4") %>
+                  <span>Supprimer</span>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>

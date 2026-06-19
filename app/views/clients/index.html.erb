@@ -5,6 +5,7 @@
 
 <% if @clients.any? %>
   <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
@@ -40,6 +41,7 @@
         <% end %>
       </tbody>
     </table>
+    </div>
   </div>
 <% else %>
   <div class="text-center py-16">

@@ -1,6 +1,6 @@
 # Facturini
 
-Application SaaS B2B de facturation multi-tenancy construite avec Ruby on Rails 8. MVP fonctionnel avec authentification, gestion de clients et factures, workflow de statuts complet, calculs automatiques, génération PDF et un design system cohérent.
+Application SaaS B2B de facturation multi-tenancy construite avec Ruby on Rails 8. MVP fonctionnel avec authentification, gestion des utilisateurs et organisations, gestion de clients et factures, workflow de statuts complet, calculs automatiques, génération PDF et un design system cohérent.
 
 ## Stack technique
 
@@ -42,15 +42,17 @@ app/
 │   │   └── authentication.rb       # Module session/current_user/require_auth
 │   ├── application_controller.rb   # Inclut Authentication
 │   ├── sessions_controller.rb      # Login/Logout (layout: auth)
-│   ├── registrations_controller.rb # Inscription org + user (layout: auth)
 │   ├── dashboard_controller.rb     # Tableau de bord
 │   ├── clients_controller.rb       # CRUD Clients
 │   ├── invoices_controller.rb      # CRUD + workflow (finalize, send, cancel, mark_as_paid, download_pdf)
-│   └── invoice_items_controller.rb # Ajout/suppression de lignes
+│   ├── invoice_items_controller.rb # Ajout/suppression de lignes
+│   ├── users_controller.rb         # CRUD Users (admin: global, owner: scoped org)
+│   ├── organizations_controller.rb # CRUD Organizations (admin uniquement)
+│   └── profiles_controller.rb      # Profil user + infos organisation
 ├── models/
-│   ├── organization.rb             # Tenant principal, invoice_prefix
-│   ├── user.rb                     # has_secure_password, enum role
-│   ├── client.rb                   # enum client_type
+│   ├── organization.rb             # Tenant principal, invoice_prefix, normalize unique fields
+│   ├── user.rb                     # has_secure_password, enum role, organization optional
+│   ├── client.rb                   # enum client_type, dependent: :destroy invoices
 │   ├── invoice.rb                  # enum status (5 états), workflow methods, numéro auto
 │   └── invoice_item.rb             # Lignes de facture
 ├── services/
@@ -68,7 +70,10 @@ app/
 │   ├── registrations/              # Inscription
 │   ├── dashboard/                  # Tableau de bord
 │   ├── clients/                    # Index, Show, New, Edit
-│   └── invoices/                   # Index, Show, New, Edit
+│   ├── invoices/                   # Index, Show, New, Edit
+│   ├── users/                      # Index, New, Edit
+│   ├── organizations/              # Index, Show, New, Edit
+│   └── profiles/                   # Show (profil + organisation)
 └── assets/
     └── tailwind/application.css    # Point d'entrée Tailwind
 ```
@@ -83,6 +88,24 @@ app/
 - **Layout dédié** — Pages auth avec layout centré (`auth.html.erb`), sans sidebar
 - **Logo cliquable** — Redirection vers la home page depuis le login
 - **Couleurs de marque** — Boutons et focus utilisant les couleurs `#0A3966` et `#27AE60`
+
+### Gestion des utilisateurs
+- **Admin** — accès global, voit tous les users de toutes les organisations
+- **Owner** — gère les users de son organisation uniquement, ne peut pas créer un user sans organisation
+- **Member** — accès factures/clients uniquement, pas de gestion users
+- Création avec rôle, email, mot de passe — impossible de se supprimer soi-même
+
+### Gestion des organisations (admin uniquement)
+- CRUD complet — créer, voir, modifier, supprimer
+- **Sélection du owner** à la création (dropdown users sans organisation)
+- **Changement de owner** possible à l'édition
+- **Suppression en cascade** — users, clients, factures supprimés avec l'organisation
+- Champs uniques (`siret`, `siren`, `vat_number`) normalisés en `nil` si vides
+
+### Page Profil
+- Tous les users : modifier prénom, nom, email, mot de passe
+- Owner/Admin : section organisation (modifier toutes les infos légales)
+- Accessible depuis le nom en bas de la sidebar
 
 ### Organisations
 - Création lors de l'inscription avec les informations légales (SIRET, SIREN, TVA, capital, forme juridique)
@@ -187,6 +210,8 @@ SVG inline via `IconsHelper` — usage : `<%= icon("eye", css_class: "size-4") %
 | `chart-bar` | Sidebar — Tableau de bord |
 | `document-text` | Sidebar — Factures |
 | `users` | Sidebar — Clients |
+| `user-group` | Sidebar — Utilisateurs |
+| `building-office` | Sidebar — Organisations |
 | `arrow-right-on-rectangle` | Sidebar — Déconnexion |
 | `eye` | Listes — Voir |
 | `pencil-square` | Modifier |
@@ -208,9 +233,9 @@ Organization
 ├── has_many :clients
 └── has_many :invoices
 
-User (belongs_to :organization)
+User (belongs_to :organization, optional: true)
 ├── has_secure_password
-└── enum role: { member: 0, owner: 1 }
+└── enum role: { member: 0, admin: 1, owner: 2 }
 
 Client (belongs_to :organization)
 └── enum client_type: { individual: 0, professional: 1 }
@@ -251,6 +276,11 @@ resources :invoices do
     get   :download_pdf       # finalized | sent | paid
   end
 end
+
+# User management
+resource  :profile                  # GET/PATCH — profil utilisateur + organisation
+resources :users, only: [:index, :new, :create, :edit, :update, :destroy]
+resources :organizations            # admin uniquement
 ```
 
 ## Sécurité
@@ -267,8 +297,20 @@ Toutes les requêtes sont scopées à l'organization de l'utilisateur connecté 
 ```ruby
 current_user.organization.invoices.find(params[:id])
 current_user.organization.clients.find(params[:id])
+current_user.organization.users.find(params[:id])  # owner
+User.find(params[:id])                              # admin uniquement
 ```
 Aucune donnée d'une autre organization n'est accessible, même en manipulant les IDs.
+
+### Rôles et autorisations
+| Action | admin | owner | member |
+|--------|-------|-------|--------|
+| Voir toutes les organisations | ✅ | ❌ | ❌ |
+| Gérer users toutes orgas | ✅ | ❌ | ❌ |
+| Gérer users de son orga | ✅ | ✅ | ❌ |
+| Créer user sans organisation | ✅ | ❌ | ❌ |
+| Modifier son organisation | ✅ | ✅ | ❌ |
+| Factures / Clients | ✅ | ✅ | ✅ |
 
 ### Workflow des factures
 Les transitions sont protégées au niveau du contrôleur **et** du modèle. Une facture non éditable bloque :
@@ -312,6 +354,9 @@ bundle exec rspec --format documentation
 | **Request specs** | `spec/requests/clients_spec.rb` | CRUD clients, validations, scoping |
 | **Request specs** | `spec/requests/invoices_spec.rb` | CRUD, workflow complet (finalize/send/cancel/pay/pdf), restrictions |
 | **Request specs** | `spec/requests/invoice_items_spec.rb` | Ajout/suppression lignes, recalcul totaux |
+| **Request specs** | `spec/requests/users_spec.rb` | CRUD users, scoping org, isolation multi-tenant, protection sans org |
+| **Request specs** | `spec/requests/organizations_spec.rb` | CRUD orgas, assignation owner, cascade delete |
+| **Request specs** | `spec/requests/profiles_spec.rb` | Profil user, update organisation, protection rôles |
 | **Service specs** | `spec/services/invoice_calculator_spec.rb` | Calculs HT, TVA, TTC, cas limites |
 | **Service specs** | `spec/services/invoice_pdf_generator_spec.rb` | Génération binaire PDF valide |
 
@@ -322,13 +367,15 @@ bundle exec rspec --format documentation
 - [x] **Responsive design** — Menu mobile burger, textes adaptatifs
 - [x] **Pages légales** — CGV, Confidentialité, Mentions légales
 - [x] **Password reset** — Email + token sécurisé
-- [ ] Page de paramètres organisation (modifier préfixe, informations légales)
+- [x] **Gestion des utilisateurs** — CRUD, rôles (admin/owner/member), scoping multi-tenant
+- [x] **Gestion des organisations** — CRUD admin, assignation owner, cascade delete
+- [x] **Page profil** — Modifier infos user + organisation
 - [ ] Filtres et tri sur la liste des factures (par statut, date, client)
 - [ ] Dashboard avancé (CA mensuel, factures impayées, graphiques)
 - [ ] Envoi de factures par email (ActionMailer + PJ PDF)
 - [ ] Pagination des listes (Pagy)
 - [ ] Export CSV des factures
-- [ ] Gestion des rôles (admin / member)
+- [ ] Invitation par email (lien d'inscription pré-rempli)
 - [ ] Ajout rapide de client depuis le formulaire de facture (modal Turbo)
 - [ ] Mentions légales sur le PDF (CGV, conditions de paiement)
 

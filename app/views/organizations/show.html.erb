@@ -1,0 +1,74 @@
+<div class="max-w-3xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl sm:text-2xl font-bold text-gray-900"><%= @organization.name %></h1>
+    <div class="flex items-center space-x-2">
+      <%= link_to edit_organization_path(@organization), class: "inline-flex items-center space-x-1.5 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-dark transition" do %>
+        <%= icon("pencil-square", css_class: "size-4") %>
+        <span>Modifier</span>
+      <% end %>
+      <%= button_to organization_path(@organization), method: :delete,
+          class: "inline-flex items-center space-x-1.5 bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition",
+          form: { data: { turbo_confirm: "Supprimer #{@organization.name} et toutes ses données ?" } } do %>
+        <%= icon("trash", css_class: "size-4") %>
+        <span>Supprimer</span>
+      <% end %>
+      <%= link_to organizations_path, class: "inline-flex items-center space-x-1.5 text-sm text-gray-500 hover:text-gray-700 transition" do %>
+        <%= icon("arrow-left", css_class: "size-4") %>
+        <span>Retour</span>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-gray-900">Informations générales</h2>
+      <div><p class="text-xs text-gray-500 uppercase tracking-wider">Email</p><p class="mt-1 text-sm text-gray-900"><%= @organization.email %></p></div>
+      <% if @organization.phone.present? %>
+        <div><p class="text-xs text-gray-500 uppercase tracking-wider">Téléphone</p><p class="mt-1 text-sm text-gray-900"><%= @organization.phone %></p></div>
+      <% end %>
+      <div><p class="text-xs text-gray-500 uppercase tracking-wider">Préfixe factures</p><p class="mt-1 text-sm font-medium text-primary"><%= @organization.invoice_prefix %></p></div>
+      <% if @organization.legal_form.present? %>
+        <div><p class="text-xs text-gray-500 uppercase tracking-wider">Forme juridique</p><p class="mt-1 text-sm text-gray-900"><%= @organization.legal_form %></p></div>
+      <% end %>
+      <% if @organization.capital.present? %>
+        <div><p class="text-xs text-gray-500 uppercase tracking-wider">Capital</p><p class="mt-1 text-sm text-gray-900"><%= number_to_currency(@organization.capital, unit: "€", separator: ",", delimiter: " ") %></p></div>
+      <% end %>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6 space-y-4">
+      <h2 class="text-base font-semibold text-gray-900">Informations légales</h2>
+      <% if @organization.siret.present? %>
+        <div><p class="text-xs text-gray-500 uppercase tracking-wider">SIRET</p><p class="mt-1 text-sm text-gray-900"><%= @organization.siret %></p></div>
+      <% end %>
+      <% if @organization.siren.present? %>
+        <div><p class="text-xs text-gray-500 uppercase tracking-wider">SIREN</p><p class="mt-1 text-sm text-gray-900"><%= @organization.siren %></p></div>
+      <% end %>
+      <% if @organization.vat_number.present? %>
+        <div><p class="text-xs text-gray-500 uppercase tracking-wider">TVA</p><p class="mt-1 text-sm text-gray-900"><%= @organization.vat_number %></p></div>
+      <% end %>
+      <% if @organization.address.present? %>
+        <div><p class="text-xs text-gray-500 uppercase tracking-wider">Adresse</p><p class="mt-1 text-sm text-gray-900"><%= @organization.address %>, <%= @organization.zip_code %> <%= @organization.city %></p></div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-semibold text-gray-900">Membres (<%= @organization.users.count %>)</h2>
+    </div>
+    <div class="divide-y divide-gray-100">
+      <% @organization.users.order(role: :desc).each do |user| %>
+        <div class="py-3 flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-900"><%= user.first_name %> <%= user.last_name %></p>
+            <p class="text-xs text-gray-500"><%= user.email %></p>
+          </div>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+            <%= user.owner? ? 'bg-primary/10 text-primary' : user.admin? ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700' %>">
+            <%= user.owner? ? "Propriétaire" : user.admin? ? "Admin" : "Membre" %>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
