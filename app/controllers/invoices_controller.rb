@@ -61,7 +61,8 @@ class InvoicesController < ApplicationController
   def send_invoice
     if @invoice.sendable?
       @invoice.update!(status: :sent, sent_at: Time.current)
-      redirect_to @invoice, notice: "Facture envoyée."
+      InvoiceMailer.send_invoice(@invoice).deliver_later
+      redirect_to @invoice, notice: "Facture envoyée par email à #{@invoice.client.email}."
     else
       redirect_to @invoice, alert: "Impossible d'envoyer cette facture."
     end

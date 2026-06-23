@@ -1,0 +1,12 @@
+Bonjour <%= @client.name %>,
+
+Veuillez trouver ci-joint votre facture <%= @invoice.number %>.
+
+Facture n° : <%= @invoice.number %>
+Montant TTC : <%= number_to_currency(@invoice.total_cents / 100.0, unit: "€", format: "%n %u") %>
+Date d'échéance : <%= l(@invoice.due_date, format: :long) %>
+
+Pour toute question, contactez-nous à <%= @organization.email %>.
+
+Cordialement,
+<%= @organization.name %>
