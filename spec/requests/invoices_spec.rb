@@ -184,6 +184,17 @@ RSpec.describe "Invoices", type: :request do
         expect(finalized_invoice.sent_at).to be_present
         expect(response).to redirect_to(invoice_path(finalized_invoice))
       end
+
+      it "enfile un email au client" do
+        expect {
+          patch send_invoice_invoice_path(finalized_invoice)
+        }.to have_enqueued_mail(InvoiceMailer, :send_invoice)
+      end
+
+      it "le notice confirme l'email du client" do
+        patch send_invoice_invoice_path(finalized_invoice)
+        expect(flash[:notice]).to include(client.email)
+      end
     end
 
     context "facture en brouillon" do
